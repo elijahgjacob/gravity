@@ -5,6 +5,7 @@ Tests the CategoryService and TaxonomyRepository with sample queries.
 """
 
 import asyncio
+import pytest
 import sys
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from src.services.category_service import CategoryService
 from src.repositories.taxonomy_repository import TaxonomyRepository
 
 
+@pytest.mark.asyncio
 async def test_category_extraction():
     """Test category extraction with various queries."""
     
