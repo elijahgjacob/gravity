@@ -1,4 +1,11 @@
-"""Quick test script to verify API server is working."""
+"""Quick test script to verify API server is working.
+
+IMPORTANT: Start the server first in a separate terminal:
+    uvicorn src.api.main:app --reload
+
+Then run this script:
+    python scripts/test_api_server.py
+"""
 
 import sys
 import requests
@@ -12,16 +19,29 @@ def test_api():
     print("=" * 60)
     print("API SERVER TEST")
     print("=" * 60)
+    print("\nℹ️  Make sure the server is running in another terminal:")
+    print("   uvicorn src.api.main:app --reload")
+    print()
     
     # Test 1: Root endpoint
-    print("\n1. Testing root endpoint...")
+    print("1. Testing root endpoint...")
     try:
-        response = requests.get(f"{base_url}/")
+        response = requests.get(f"{base_url}/", timeout=5)
         print(f"   Status: {response.status_code}")
         print(f"   Response: {json.dumps(response.json(), indent=2)}")
+    except requests.exceptions.ConnectionError:
+        print(f"   ❌ Connection refused - Server is not running!")
+        print()
+        print("   Start the server first:")
+        print("   1. Open a new terminal")
+        print("   2. cd /Users/elijahgjacob/gravity")
+        print("   3. source venv/bin/activate")
+        print("   4. uvicorn src.api.main:app --reload")
+        print()
+        print("   Then run this script again.")
+        sys.exit(1)
     except Exception as e:
         print(f"   ❌ Error: {e}")
-        print("   Make sure server is running: uvicorn src.api.main:app --reload")
         sys.exit(1)
     
     # Test 2: Health check
