@@ -1,0 +1,182 @@
+{
+  "running_shoes": {
+    "keywords": ["running shoes", "marathon shoes", "jogging footwear", "running sneakers", "trail running shoes"],
+    "related": ["fitness", "running", "sports", "marathon"]
+  },
+  "athletic_footwear": {
+    "keywords": ["athletic shoes", "sports shoes", "training shoes", "gym shoes", "workout shoes"],
+    "related": ["fitness", "sports", "gym", "training"]
+  },
+  "marathon_gear": {
+    "keywords": ["marathon gear", "marathon training", "race preparation", "marathon equipment", "endurance gear"],
+    "related": ["running", "fitness", "sports", "marathon"]
+  },
+  "fitness_trackers": {
+    "keywords": ["fitness tracker", "smartwatch", "activity monitor", "step counter", "fitness watch", "wearable"],
+    "related": ["fitness", "technology", "health", "running"]
+  },
+  "sports_nutrition": {
+    "keywords": ["protein powder", "energy bars", "sports drinks", "supplements", "pre-workout", "recovery drink"],
+    "related": ["fitness", "health", "nutrition", "sports"]
+  },
+  "athletic_apparel": {
+    "keywords": ["athletic wear", "workout clothes", "gym clothes", "sports apparel", "activewear", "compression gear"],
+    "related": ["fitness", "sports", "fashion"]
+  },
+  "yoga_equipment": {
+    "keywords": ["yoga mat", "yoga blocks", "yoga strap", "meditation cushion", "yoga pants"],
+    "related": ["fitness", "wellness", "health", "yoga"]
+  },
+  "gym_equipment": {
+    "keywords": ["dumbbells", "kettlebells", "resistance bands", "weight bench", "home gym", "exercise equipment"],
+    "related": ["fitness", "gym", "training", "strength"]
+  },
+  "cycling_gear": {
+    "keywords": ["bicycle", "bike helmet", "cycling shoes", "bike accessories", "road bike", "mountain bike"],
+    "related": ["fitness", "cycling", "sports", "outdoor"]
+  },
+  "outdoor_gear": {
+    "keywords": ["hiking boots", "camping gear", "backpack", "outdoor equipment", "trail gear"],
+    "related": ["outdoor", "hiking", "camping", "adventure"]
+  },
+  "electronics": {
+    "keywords": ["laptop", "smartphone", "tablet", "headphones", "computer", "electronics"],
+    "related": ["technology", "gadgets", "computing"]
+  },
+  "smartphones": {
+    "keywords": ["iphone", "android phone", "mobile phone", "smartphone", "cell phone"],
+    "related": ["technology", "mobile", "communication"]
+  },
+  "laptops": {
+    "keywords": ["laptop", "notebook", "macbook", "chromebook", "gaming laptop", "ultrabook"],
+    "related": ["technology", "computing", "work"]
+  },
+  "headphones": {
+    "keywords": ["headphones", "earbuds", "wireless headphones", "noise cancelling", "airpods"],
+    "related": ["technology", "audio", "music"]
+  },
+  "smart_home": {
+    "keywords": ["smart speaker", "smart lights", "home automation", "alexa", "google home", "smart thermostat"],
+    "related": ["technology", "home", "automation"]
+  },
+  "gaming": {
+    "keywords": ["video games", "gaming console", "playstation", "xbox", "nintendo", "gaming pc"],
+    "related": ["technology", "gaming", "entertainment"]
+  },
+  "travel_destinations": {
+    "keywords": ["vacation", "travel", "tourism", "holiday", "destination", "trip"],
+    "related": ["travel", "vacation", "tourism"]
+  },
+  "hotels": {
+    "keywords": ["hotel", "resort", "accommodation", "lodging", "booking", "stay"],
+    "related": ["travel", "vacation", "hospitality"]
+  },
+  "flights": {
+    "keywords": ["flights", "airline tickets", "airfare", "plane tickets", "flight booking"],
+    "related": ["travel", "vacation", "transportation"]
+  },
+  "luggage": {
+    "keywords": ["suitcase", "luggage", "travel bag", "carry-on", "backpack", "duffel bag"],
+    "related": ["travel", "vacation", "accessories"]
+  },
+  "automotive": {
+    "keywords": ["car", "vehicle", "automobile", "auto", "truck", "suv"],
+    "related": ["automotive", "transportation", "vehicles"]
+  },
+  "car_parts": {
+    "keywords": ["car parts", "auto parts", "tires", "oil", "brake pads", "car accessories"],
+    "related": ["automotive", "maintenance", "repair"]
+  },
+  "insurance": {
+    "keywords": ["insurance", "car insurance", "health insurance", "life insurance", "coverage"],
+    "related": ["finance", "insurance", "protection"]
+  },
+  "credit_cards": {
+    "keywords": ["credit card", "rewards card", "cashback", "credit card offers", "credit"],
+    "related": ["finance", "credit", "banking"]
+  },
+  "loans": {
+    "keywords": ["personal loan", "mortgage", "auto loan", "student loan", "loan", "financing"],
+    "related": ["finance", "lending", "banking"]
+  },
+  "investing": {
+    "keywords": ["stocks", "investing", "trading", "etf", "mutual funds", "portfolio"],
+    "related": ["finance", "investing", "wealth"]
+  },
+  "health_wellness": {
+    "keywords": ["health", "wellness", "healthy living", "wellbeing", "healthcare"],
+    "related": ["health", "wellness", "lifestyle"]
+  },
+  "vitamins_supplements": {
+    "keywords": ["vitamins", "supplements", "multivitamin", "omega-3", "probiotics"],
+    "related": ["health", "wellness", "nutrition"]
+  },
+  "skincare": {
+    "keywords": ["skincare", "moisturizer", "sunscreen", "face wash", "anti-aging", "serum"],
+    "related": ["beauty", "health", "skincare"]
+  },
+  "beauty_products": {
+    "keywords": ["makeup", "cosmetics", "beauty products", "lipstick", "foundation"],
+    "related": ["beauty", "cosmetics", "fashion"]
+  },
+  "online_courses": {
+    "keywords": ["online course", "elearning", "certification", "training", "education", "class"],
+    "related": ["education", "learning", "training"]
+  },
+  "books": {
+    "keywords": ["books", "ebooks", "audiobooks", "reading", "literature", "novel"],
+    "related": ["education", "reading", "entertainment"]
+  },
+  "home_furniture": {
+    "keywords": ["furniture", "sofa", "bed", "table", "chair", "home decor"],
+    "related": ["home", "furniture", "decor"]
+  },
+  "kitchen_appliances": {
+    "keywords": ["blender", "coffee maker", "toaster", "microwave", "kitchen appliances"],
+    "related": ["home", "kitchen", "appliances"]
+  },
+  "fashion_clothing": {
+    "keywords": ["clothing", "fashion", "dress", "shirt", "pants", "outfit"],
+    "related": ["fashion", "clothing", "style"]
+  },
+  "shoes": {
+    "keywords": ["shoes", "sneakers", "boots", "sandals", "footwear"],
+    "related": ["fashion", "footwear", "style"]
+  },
+  "watches": {
+    "keywords": ["watch", "wristwatch", "luxury watch", "smartwatch", "timepiece"],
+    "related": ["fashion", "accessories", "technology"]
+  },
+  "jewelry": {
+    "keywords": ["jewelry", "necklace", "earrings", "bracelet", "ring", "accessories"],
+    "related": ["fashion", "accessories", "luxury"]
+  },
+  "pet_supplies": {
+    "keywords": ["pet supplies", "dog food", "cat food", "pet toys", "pet accessories"],
+    "related": ["pets", "animals", "supplies"]
+  },
+  "baby_products": {
+    "keywords": ["baby products", "diapers", "baby formula", "stroller", "car seat"],
+    "related": ["baby", "parenting", "family"]
+  },
+  "toys": {
+    "keywords": ["toys", "kids toys", "games", "puzzles", "action figures"],
+    "related": ["kids", "toys", "entertainment"]
+  },
+  "streaming_services": {
+    "keywords": ["streaming", "netflix", "spotify", "subscription", "entertainment"],
+    "related": ["entertainment", "streaming", "media"]
+  },
+  "software": {
+    "keywords": ["software", "app", "application", "program", "tool", "saas"],
+    "related": ["technology", "software", "productivity"]
+  },
+  "web_hosting": {
+    "keywords": ["web hosting", "domain", "website", "hosting", "server"],
+    "related": ["technology", "web", "business"]
+  },
+  "general": {
+    "keywords": ["product", "service", "buy", "shop", "purchase"],
+    "related": ["general", "shopping"]
+  }
+}
