@@ -43,30 +43,20 @@ drug overdose
 stroke symptoms
 can't breathe
 
-# Tragedy and grief
+# Tragedy and grief (immediate/acute only)
 mom died
 dad died
-passed away
-funeral
-mourning
-grief counseling
 just died
 death in family
 
-# Mental health crises
-depressed
+# Mental health crises (acute only)
 severe depression
-panic attack
-anxiety attack
 mental breakdown
 nervous breakdown
 
-# Financial distress
+# Financial distress (severe cases only)
 bankruptcy
 filed bankruptcy
-unemployed
-just got fired
-laid off
 foreclosure
 eviction
 homeless
