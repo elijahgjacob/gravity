@@ -68,6 +68,11 @@ class RetrievalController:
         self.search_service = search_service
         self.ranking_service = ranking_service
         self.graphiti_service = graphiti_service
+        
+        if graphiti_service:
+            logger.info("Graphiti service enabled for controller")
+        else:
+            logger.debug("Graphiti service not available")
     
     async def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
         """
@@ -178,7 +183,8 @@ class RetrievalController:
             for c in final_campaigns
         ]
         
-        return RetrievalResponse(
+        # Build response
+        response = RetrievalResponse(
             ad_eligibility=eligibility,
             extracted_categories=categories,
             campaigns=campaign_models,
@@ -189,3 +195,61 @@ class RetrievalController:
                 "top_relevance_score": campaign_models[0].relevance_score if campaign_models else 0.0
             }
         )
+        
+        # Fire-and-forget: Record to Graphiti (no latency impact)
+        if self.graphiti_service:
+            asyncio.create_task(
+                self._record_to_graphiti_safe(
+                    request, eligibility, categories, campaign_models, context_dict
+                )
+            )
+        
+        return response
+    
+    async def _record_to_graphiti_safe(
+        self,
+        request: RetrievalRequest,
+        eligibility: float,
+        categories: list,
+        campaigns: list,
+        context_dict: Optional[dict]
+    ) -> None:
+        """
+        Safely record query event to Graphiti.
+        
+        This method wraps Graphiti recording in try-except to ensure
+        that any Graphiti errors don't affect the retrieval pipeline.
+        
+        Args:
+            request: Original retrieval request
+            eligibility: Calculated eligibility score
+            categories: Extracted categories
+            campaigns: Top campaigns returned
+            context_dict: User context dictionary
+        """
+        try:
+            # Convert Campaign models to dicts for Graphiti
+            campaign_dicts = [
+                {
+                    "campaign_id": c.campaign_id,
+                    "title": c.title,
+                    "category": c.category,
+                    "relevance_score": c.relevance_score
+                }
+                for c in campaigns[:10]  # Only record top 10
+            ]
+            
+            await self.graphiti_service.record_query_event(
+                query=request.query,
+                context=context_dict,
+                eligibility=eligibility,
+                categories=categories,
+                campaigns=campaign_dicts,
+                session_id=None  # TODO: Add session tracking
+            )
+            
+            logger.debug(f"Query event recorded to Graphiti: '{request.query[:50]}...'")
+            
+        except Exception as e:
+            # Log warning but don't propagate error
+            logger.warning(f"Graphiti recording failed (non-critical): {e}")
