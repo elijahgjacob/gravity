@@ -32,14 +32,16 @@ class TestPhase5Integration:
     @pytest.fixture
     def campaign_repo(self):
         """Create campaign repository fixture."""
-        campaigns_path = "data/campaigns.jsonl"
-        return CampaignRepository(campaigns_path)
+        project_root = Path(__file__).parent.parent.parent
+        campaigns_path = project_root / "data" / "campaigns.jsonl"
+        return CampaignRepository(str(campaigns_path))
     
     @pytest.fixture
     def vector_repo(self):
         """Create vector repository fixture."""
-        index_path = "data/faiss.index"
-        return VectorRepository(index_path)
+        project_root = Path(__file__).parent.parent.parent
+        index_path = project_root / "data" / "faiss.index"
+        return VectorRepository(str(index_path))
     
     @pytest.fixture
     def search_service(self, vector_repo, campaign_repo):
@@ -527,12 +529,13 @@ class TestPhase5Integration:
 def test_phase5_components_exist():
     """Test that all Phase 5 components are properly created."""
     # Check that files exist
-    assert Path("src/services/embedding_service.py").exists()
-    assert Path("src/services/search_service.py").exists()
-    assert Path("src/repositories/vector_repository.py").exists()
-    assert Path("src/repositories/campaign_repository.py").exists()
-    assert Path("data/campaigns.jsonl").exists()
-    assert Path("data/faiss.index").exists()
+    project_root = Path(__file__).parent.parent.parent
+    assert (project_root / "src" / "services" / "embedding_service.py").exists()
+    assert (project_root / "src" / "services" / "search_service.py").exists()
+    assert (project_root / "src" / "repositories" / "vector_repository.py").exists()
+    assert (project_root / "src" / "repositories" / "campaign_repository.py").exists()
+    assert (project_root / "data" / "campaigns.jsonl").exists()
+    assert (project_root / "data" / "faiss.index").exists()
     
     # Check that classes can be imported
     from src.services.embedding_service import EmbeddingService

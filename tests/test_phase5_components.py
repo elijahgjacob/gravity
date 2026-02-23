@@ -114,7 +114,9 @@ class TestCampaignRepository:
     @pytest.fixture
     def campaign_repo(self):
         """Create campaign repository fixture."""
-        return CampaignRepository("data/campaigns.jsonl")
+        project_root = Path(__file__).parent.parent
+        campaigns_path = project_root / "data" / "campaigns.jsonl"
+        return CampaignRepository(str(campaigns_path))
     
     def test_repository_initialization(self, campaign_repo):
         """Test that repository loads campaigns."""
@@ -184,11 +186,12 @@ class TestCampaignRepository:
 def test_phase5_components_exist():
     """Test that all Phase 5 components are properly created."""
     # Check that files exist
-    assert Path("src/services/embedding_service.py").exists()
-    assert Path("src/services/search_service.py").exists()
-    assert Path("src/repositories/vector_repository.py").exists()
-    assert Path("src/repositories/campaign_repository.py").exists()
-    assert Path("scripts/build_index.py").exists()
+    project_root = Path(__file__).parent.parent
+    assert (project_root / "src" / "services" / "embedding_service.py").exists()
+    assert (project_root / "src" / "services" / "search_service.py").exists()
+    assert (project_root / "src" / "repositories" / "vector_repository.py").exists()
+    assert (project_root / "src" / "repositories" / "campaign_repository.py").exists()
+    assert (project_root / "scripts" / "build_index.py").exists()
     
     # Check that classes can be imported
     from src.services.embedding_service import EmbeddingService

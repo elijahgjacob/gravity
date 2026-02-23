@@ -2,16 +2,21 @@
 
 import pytest
 import os
+from pathlib import Path
 
 
 def test_blocklist_file_exists():
     """Test that blocklist.txt file exists."""
-    assert os.path.exists("data/blocklist.txt")
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    assert blocklist_path.exists()
 
 
 def test_blocklist_not_empty():
     """Test that blocklist contains entries."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         lines = f.readlines()
     
     # Filter out comments and empty lines
@@ -22,7 +27,9 @@ def test_blocklist_not_empty():
 
 def test_blocklist_format():
     """Test that blocklist entries are properly formatted."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         lines = f.readlines()
     
     for line in lines:
@@ -39,7 +46,9 @@ def test_blocklist_format():
 
 def test_blocklist_has_critical_terms():
     """Test that blocklist includes critical safety terms."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         content = f.read().lower()
     
     critical_categories = [
@@ -55,7 +64,9 @@ def test_blocklist_has_critical_terms():
 
 def test_blocklist_no_duplicate_terms():
     """Test that blocklist doesn't have duplicate terms."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         lines = f.readlines()
     
     terms = [line.strip().lower() for line in lines if line.strip() and not line.strip().startswith("#")]
@@ -67,7 +78,9 @@ def test_blocklist_no_duplicate_terms():
 
 def test_blocklist_organized_by_category():
     """Test that blocklist has category comments."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         content = f.read()
     
     # Should have category headers
@@ -76,7 +89,9 @@ def test_blocklist_organized_by_category():
 
 def test_blocklist_minimum_coverage():
     """Test that blocklist covers minimum safety categories."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         content = f.read().lower()
     
     # Check for different safety categories
@@ -97,7 +112,9 @@ def test_blocklist_minimum_coverage():
 
 def test_blocklist_terms_are_strings():
     """Test that all blocklist terms are valid strings."""
-    with open("data/blocklist.txt", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    blocklist_path = project_root / "data" / "blocklist.txt"
+    with open(blocklist_path, "r") as f:
         lines = f.readlines()
     
     for line in lines:

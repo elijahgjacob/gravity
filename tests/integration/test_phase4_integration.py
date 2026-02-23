@@ -23,8 +23,9 @@ class TestPhase4Integration:
     @pytest.fixture
     def taxonomy_repo(self):
         """Create taxonomy repository fixture."""
-        taxonomy_path = "data/taxonomy.json"
-        return TaxonomyRepository(taxonomy_path)
+        project_root = Path(__file__).parent.parent.parent
+        taxonomy_path = project_root / "data" / "taxonomy.json"
+        return TaxonomyRepository(str(taxonomy_path))
     
     @pytest.fixture
     def category_service(self, taxonomy_repo):
@@ -260,9 +261,10 @@ class TestPhase4Integration:
 def test_phase4_components_exist():
     """Test that all Phase 4 components are properly created."""
     # Check that files exist
-    assert Path("src/repositories/taxonomy_repository.py").exists()
-    assert Path("src/services/category_service.py").exists()
-    assert Path("data/taxonomy.json").exists()
+    project_root = Path(__file__).parent.parent.parent
+    assert (project_root / "src" / "repositories" / "taxonomy_repository.py").exists()
+    assert (project_root / "src" / "services" / "category_service.py").exists()
+    assert (project_root / "data" / "taxonomy.json").exists()
     
     # Check that classes can be imported
     from src.repositories.taxonomy_repository import TaxonomyRepository

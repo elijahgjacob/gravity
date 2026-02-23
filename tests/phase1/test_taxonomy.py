@@ -3,16 +3,21 @@
 import pytest
 import json
 import os
+from pathlib import Path
 
 
 def test_taxonomy_file_exists():
     """Test that taxonomy.json file exists."""
-    assert os.path.exists("data/taxonomy.json")
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    assert taxonomy_path.exists()
 
 
 def test_taxonomy_valid_json():
     """Test that taxonomy file is valid JSON."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     assert isinstance(taxonomy, dict)
@@ -21,7 +26,9 @@ def test_taxonomy_valid_json():
 
 def test_taxonomy_structure():
     """Test that taxonomy has correct structure."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():
@@ -40,7 +47,9 @@ def test_taxonomy_structure():
 
 def test_taxonomy_has_minimum_categories():
     """Test that taxonomy has at least 40 categories."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     assert len(taxonomy) >= 40
@@ -48,7 +57,9 @@ def test_taxonomy_has_minimum_categories():
 
 def test_taxonomy_keywords_are_strings():
     """Test that all keywords are strings."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():
@@ -59,7 +70,9 @@ def test_taxonomy_keywords_are_strings():
 
 def test_taxonomy_related_are_strings():
     """Test that all related items are strings."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():
@@ -70,7 +83,9 @@ def test_taxonomy_related_are_strings():
 
 def test_taxonomy_no_duplicate_keywords():
     """Test that each category has unique keywords."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():
@@ -80,7 +95,9 @@ def test_taxonomy_no_duplicate_keywords():
 
 def test_taxonomy_expected_categories():
     """Test that taxonomy includes expected core categories."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     expected_categories = [
@@ -106,7 +123,9 @@ def test_taxonomy_expected_categories():
 
 def test_taxonomy_keywords_lowercase():
     """Test that keywords are in lowercase for consistent matching."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():
@@ -118,7 +137,9 @@ def test_taxonomy_keywords_lowercase():
 
 def test_taxonomy_related_not_empty():
     """Test that each category has at least one related interest."""
-    with open("data/taxonomy.json", "r") as f:
+    project_root = Path(__file__).parent.parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    with open(taxonomy_path, "r") as f:
         taxonomy = json.load(f)
     
     for category_name, category_data in taxonomy.items():

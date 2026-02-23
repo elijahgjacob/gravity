@@ -8,6 +8,7 @@ to ensure proper ad eligibility scoring.
 import pytest
 import tempfile
 import os
+from pathlib import Path
 from src.repositories.blocklist_repository import BlocklistRepository
 from src.services.eligibility_service import EligibilityService
 
@@ -235,7 +236,9 @@ class TestEligibilityServiceRealWorldQueries:
     @pytest.fixture
     def eligibility_service(self):
         """Create an EligibilityService with actual blocklist"""
-        blocklist_repo = BlocklistRepository("data/blocklist.txt")
+        project_root = Path(__file__).parent.parent.parent
+        blocklist_path = project_root / "data" / "blocklist.txt"
+        blocklist_repo = BlocklistRepository(str(blocklist_path))
         return EligibilityService(blocklist_repo)
     
     @pytest.mark.asyncio

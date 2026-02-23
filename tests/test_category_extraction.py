@@ -21,8 +21,9 @@ async def test_category_extraction():
     """Test category extraction with various queries."""
     
     # Initialize repository and service
-    taxonomy_path = "data/taxonomy.json"
-    taxonomy_repo = TaxonomyRepository(taxonomy_path)
+    project_root = Path(__file__).parent.parent
+    taxonomy_path = project_root / "data" / "taxonomy.json"
+    taxonomy_repo = TaxonomyRepository(str(taxonomy_path))
     category_service = CategoryService(taxonomy_repo)
     
     print(f"✓ Loaded taxonomy with {taxonomy_repo.get_category_count()} categories\n")

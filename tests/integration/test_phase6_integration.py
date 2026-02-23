@@ -759,7 +759,8 @@ class TestPhase6Integration:
 def test_phase6_components_exist():
     """Test that all Phase 6 components are properly created."""
     # Check that files exist
-    assert Path("src/services/ranking_service.py").exists()
+    project_root = Path(__file__).parent.parent.parent
+    assert (project_root / "src" / "services" / "ranking_service.py").exists()
     
     # Check that class can be imported
     from src.services.ranking_service import RankingService

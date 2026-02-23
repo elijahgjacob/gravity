@@ -6,6 +6,11 @@ with real data files.
 """
 
 import pytest
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from src.repositories.blocklist_repository import BlocklistRepository
 from src.services.eligibility_service import EligibilityService
 
@@ -16,7 +21,9 @@ class TestPhase3Integration:
     @pytest.fixture
     def eligibility_service(self):
         """Create an EligibilityService with real blocklist"""
-        blocklist_repo = BlocklistRepository("data/blocklist.txt")
+        project_root = Path(__file__).parent.parent.parent
+        blocklist_path = project_root / "data" / "blocklist.txt"
+        blocklist_repo = BlocklistRepository(str(blocklist_path))
         return EligibilityService(blocklist_repo)
     
     @pytest.mark.asyncio
