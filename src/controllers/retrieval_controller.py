@@ -23,6 +23,12 @@ from src.services.search_service import SearchService
 from src.services.ranking_service import RankingService
 from src.core.logging_config import get_logger
 
+# Import GraphitiService with try-except for graceful degradation
+try:
+    from src.services.graphiti_service import GraphitiService
+except ImportError:
+    GraphitiService = None
+
 logger = get_logger(__name__)
 
 
@@ -42,7 +48,8 @@ class RetrievalController:
         category_service: CategoryService,
         embedding_service: EmbeddingService,
         search_service: SearchService,
-        ranking_service: RankingService
+        ranking_service: RankingService,
+        graphiti_service: Optional['GraphitiService'] = None
     ):
         """
         Initialize the retrieval controller.
@@ -53,12 +60,14 @@ class RetrievalController:
             embedding_service: Service for query embedding
             search_service: Service for vector similarity search
             ranking_service: Service for relevance ranking
+            graphiti_service: Optional service for knowledge graph recording
         """
         self.eligibility_service = eligibility_service
         self.category_service = category_service
         self.embedding_service = embedding_service
         self.search_service = search_service
         self.ranking_service = ranking_service
+        self.graphiti_service = graphiti_service
     
     async def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
         """
