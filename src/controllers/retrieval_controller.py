@@ -13,6 +13,7 @@ This controller handles the complete ad retrieval pipeline:
 import asyncio
 import time
 from typing import Optional
+from datetime import datetime
 
 from src.api.models.requests import RetrievalRequest
 from src.api.models.responses import RetrievalResponse, Campaign
@@ -23,11 +24,21 @@ from src.services.search_service import SearchService
 from src.services.ranking_service import RankingService
 from src.core.logging_config import get_logger
 
-# Import GraphitiService with try-except for graceful degradation
+# Import optional services with graceful degradation
 try:
     from src.services.graphiti_service import GraphitiService
 except ImportError:
     GraphitiService = None
+
+try:
+    from src.services.intent_evolution_service import IntentEvolutionService
+except ImportError:
+    IntentEvolutionService = None
+
+try:
+    from src.repositories.session_state_repository import SessionStateRepository
+except ImportError:
+    SessionStateRepository = None
 
 logger = get_logger(__name__)
 
@@ -49,7 +60,9 @@ class RetrievalController:
         embedding_service: EmbeddingService,
         search_service: SearchService,
         ranking_service: RankingService,
-        graphiti_service: Optional['GraphitiService'] = None
+        graphiti_service: Optional['GraphitiService'] = None,
+        session_state_repo: Optional['SessionStateRepository'] = None,
+        intent_evolution_service: Optional['IntentEvolutionService'] = None
     ):
         """
         Initialize the retrieval controller.
@@ -61,6 +74,8 @@ class RetrievalController:
             search_service: Service for vector similarity search
             ranking_service: Service for relevance ranking
             graphiti_service: Optional service for knowledge graph recording
+            session_state_repo: Optional repository for session state tracking
+            intent_evolution_service: Optional service for intent analysis
         """
         self.eligibility_service = eligibility_service
         self.category_service = category_service
@@ -68,11 +83,19 @@ class RetrievalController:
         self.search_service = search_service
         self.ranking_service = ranking_service
         self.graphiti_service = graphiti_service
+        self.session_state_repo = session_state_repo
+        self.intent_evolution_service = intent_evolution_service
         
         if graphiti_service:
             logger.info("Graphiti service enabled for controller")
         else:
             logger.debug("Graphiti service not available")
+        
+        if session_state_repo:
+            logger.info("Session state tracking enabled")
+        
+        if intent_evolution_service:
+            logger.info("Intent evolution service enabled")
     
     async def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
         """
@@ -98,6 +121,23 @@ class RetrievalController:
         context_dict = request.context.model_dump() if request.context else None
         
         logger.info(f"Starting retrieval for query: '{request.query[:50]}...'")
+        
+        # Store query in session state (if session tracking enabled)
+        previous_queries = []
+        if request.session_id and self.session_state_repo:
+            # Get previous queries before adding current one
+            previous_queries = self.session_state_repo.get_session_queries(request.session_id)
+            
+            # Add current query to session (eligibility will be filled later)
+            self.session_state_repo.add_query(request.session_id, {
+                'query': request.query,
+                'timestamp': datetime.now(),
+                'eligibility': None  # Will be updated after calculation
+            })
+            
+            logger.debug(
+                f"Session {request.session_id}: query #{len(previous_queries) + 1}"
+            )
         
         # Phase 1: Parallel processing of eligibility and categories
         logger.debug("Phase 1: Parallel eligibility + category extraction")
@@ -152,13 +192,14 @@ class RetrievalController:
         
         logger.debug(f"Retrieved {len(candidates)} candidates")
         
-        # Phase 4: Relevance ranking
+        # Phase 4: Relevance ranking (with optional intent-based adjustments)
         logger.debug("Phase 4: Relevance ranking")
         ranked_campaigns = await self.ranking_service.rank(
             candidates,
             request.query,
             categories,
-            context_dict
+            context_dict,
+            session_id=request.session_id  # Pass session_id for intent-based ranking
         )
         
         # Return top 1000 (or fewer if less available)
@@ -196,13 +237,30 @@ class RetrievalController:
             }
         )
         
+        # Update session state with eligibility (if session tracking enabled)
+        if request.session_id and self.session_state_repo:
+            queries = self.session_state_repo.get_session_queries(request.session_id)
+            if queries:
+                # Update the last query with eligibility
+                queries[-1]['eligibility'] = eligibility
+        
         # Fire-and-forget: Record to Graphiti (no latency impact)
         if self.graphiti_service:
-            asyncio.create_task(
-                self._record_to_graphiti_safe(
-                    request, eligibility, categories, campaign_models, context_dict
+            # Use enhanced conversational recording if session_id provided
+            if request.session_id:
+                asyncio.create_task(
+                    self._record_conversational_to_graphiti_safe(
+                        request, eligibility, categories, campaign_models, 
+                        context_dict, previous_queries
+                    )
                 )
-            )
+            else:
+                # Fall back to standard recording
+                asyncio.create_task(
+                    self._record_to_graphiti_safe(
+                        request, eligibility, categories, campaign_models, context_dict
+                    )
+                )
         
         return response
     
@@ -253,3 +311,57 @@ class RetrievalController:
         except Exception as e:
             # Log warning but don't propagate error
             logger.warning(f"Graphiti recording failed (non-critical): {e}")
+    
+    async def _record_conversational_to_graphiti_safe(
+        self,
+        request: RetrievalRequest,
+        eligibility: float,
+        categories: list,
+        campaigns: list,
+        context_dict: Optional[dict],
+        previous_queries: list
+    ) -> None:
+        """
+        Safely record conversational query event to Graphiti.
+        
+        This enhanced recording includes session history and conversation
+        dynamics for better intent extraction by Graphiti's LLM.
+        
+        Args:
+            request: Original retrieval request
+            eligibility: Calculated eligibility score
+            categories: Extracted categories
+            campaigns: Top campaigns returned
+            context_dict: User context dictionary
+            previous_queries: Previous queries in session
+        """
+        try:
+            # Convert Campaign models to dicts for Graphiti
+            campaign_dicts = [
+                {
+                    "campaign_id": c.campaign_id,
+                    "title": c.title,
+                    "category": c.category,
+                    "relevance_score": c.relevance_score
+                }
+                for c in campaigns[:10]  # Only record top 10
+            ]
+            
+            await self.graphiti_service.record_conversational_query(
+                query=request.query,
+                session_id=request.session_id,
+                previous_queries=previous_queries,
+                context=context_dict,
+                eligibility=eligibility,
+                categories=categories,
+                campaigns=campaign_dicts
+            )
+            
+            logger.debug(
+                f"Conversational query recorded to Graphiti: "
+                f"session={request.session_id}, query='{request.query[:50]}...'"
+            )
+            
+        except Exception as e:
+            # Log warning but don't propagate error
+            logger.warning(f"Graphiti conversational recording failed (non-critical): {e}")
