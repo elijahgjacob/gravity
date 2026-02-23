@@ -1,0 +1,142 @@
+[
+  {
+    "name": "Nonsense - Random Characters",
+    "query": "asdfghjkl qwertyuiop zxcvbnm",
+    "context": {},
+    "note": "Random keyboard mashing"
+  },
+  {
+    "name": "Extreme Length - Very Long Query",
+    "query": "I need to buy a laptop but not just any laptop I need the best laptop in the world with the fastest processor and the most RAM and the biggest screen and the longest battery life and the lightest weight and the best keyboard and the best trackpad and the best speakers and the best webcam and the best microphone and it needs to be able to run all my games and all my software and all my applications and it needs to be able to handle video editing and photo editing and 3D rendering and machine learning and artificial intelligence and quantum computing and blockchain and cryptocurrency mining and virtual reality and augmented reality and mixed reality and holographic displays and neural interfaces and brain-computer interfaces and teleportation and time travel and interdimensional portals",
+    "context": {
+      "age": 25,
+      "interests": ["technology", "sci-fi", "fantasy"]
+    },
+    "note": "Extremely long run-on sentence"
+  },
+  {
+    "name": "Emoji Overload",
+    "query": "🏃‍♂️🏃‍♀️👟👟👟💪💪💪🔥🔥🔥⚡⚡⚡🏆🏆🏆🎯🎯🎯",
+    "context": {},
+    "note": "Only emojis, no text"
+  },
+  {
+    "name": "Mixed Languages",
+    "query": "Je voudrais acheter running shoes pero también necesito yoga mat и еще мне нужен laptop 和一些 protein powder",
+    "context": {
+      "age": 30,
+      "location": "International"
+    },
+    "note": "Mix of French, English, Spanish, Russian, Chinese"
+  },
+  {
+    "name": "Code Injection Attempt",
+    "query": "<script>alert('xss')</script> DROP TABLE users; SELECT * FROM passwords WHERE 1=1; rm -rf /",
+    "context": {},
+    "note": "Various injection attempts"
+  },
+  {
+    "name": "Philosophical Existential",
+    "query": "What is the meaning of life and can I buy it on Amazon? Does free will exist or are all my purchases predetermined by the cosmic algorithm?",
+    "context": {},
+    "note": "Philosophical nonsense with shopping mixed in"
+  },
+  {
+    "name": "Time Traveler",
+    "query": "I need to buy supplies for my time machine to go back to 1885 and also need modern running shoes to outrun dinosaurs in the Jurassic period",
+    "context": {
+      "age": 150,
+      "interests": ["time travel", "paleontology"]
+    },
+    "note": "Impossible scenario"
+  },
+  {
+    "name": "Contradictory Requirements",
+    "query": "I need the cheapest most expensive laptop that is both lightweight and heavy, with a small large screen, that is waterproof but also catches fire easily",
+    "context": {},
+    "note": "Self-contradicting requirements"
+  },
+  {
+    "name": "Single Character",
+    "query": "a",
+    "context": {},
+    "note": "Minimal input"
+  },
+  {
+    "name": "Numbers Only",
+    "query": "123456789 42 3.14159 2.71828 1337 404 500",
+    "context": {},
+    "note": "Only numbers"
+  },
+  {
+    "name": "Repeated Word Spam",
+    "query": "shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes shoes",
+    "context": {},
+    "note": "Same word repeated many times"
+  },
+  {
+    "name": "Special Characters",
+    "query": "!@#$%^&*()_+-=[]{}|;':\",./<>?`~",
+    "context": {},
+    "note": "Only special characters"
+  },
+  {
+    "name": "Conspiracy Theory",
+    "query": "I need aluminum foil to protect my brain from 5G mind control rays and also need running shoes that won't let the government track my location via GPS nanobots",
+    "context": {
+      "age": 45,
+      "interests": ["conspiracy theories", "privacy"]
+    },
+    "note": "Paranoid conspiracy content"
+  },
+  {
+    "name": "Meta Query",
+    "query": "I want to buy an ad that advertises ads about advertising ad platforms for selling ads",
+    "context": {},
+    "note": "Self-referential meta query"
+  },
+  {
+    "name": "Fictional Products",
+    "query": "Where can I buy a lightsaber, sonic screwdriver, portal gun, infinity gauntlet, and a flux capacitor?",
+    "context": {
+      "age": 28,
+      "interests": ["sci-fi", "movies", "gaming"]
+    },
+    "note": "All fictional items from movies/games"
+  },
+  {
+    "name": "Illegal Items",
+    "query": "I need to buy weapons, explosives, and illegal substances for my totally legal activities",
+    "context": {},
+    "note": "Clearly illegal items"
+  },
+  {
+    "name": "Whitespace Only",
+    "query": "                    ",
+    "context": {},
+    "note": "Only spaces"
+  },
+  {
+    "name": "URL Injection",
+    "query": "Check out this amazing deal at http://definitely-not-malware.com/steal-your-data.exe",
+    "context": {},
+    "note": "Contains suspicious URL"
+  },
+  {
+    "name": "Shakespearean English",
+    "query": "Pray tell, good merchant, wherefore might I procure the finest running shoes for mine marathon endeavor? Verily, I seeketh footwear most swift!",
+    "context": {
+      "age": 400,
+      "location": "Stratford-upon-Avon"
+    },
+    "note": "Old English style"
+  },
+  {
+    "name": "Baby Talk",
+    "query": "me want shoesies for runny run fast fast goo goo ga ga",
+    "context": {
+      "age": 2
+    },
+    "note": "Infantile language"
+  }
+]

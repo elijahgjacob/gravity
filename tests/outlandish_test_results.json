@@ -1,0 +1,225 @@
+{
+  "successful": [
+    {
+      "name": "Nonsense - Random Characters",
+      "query": "asdfghjkl qwertyuiop zxcvbnm",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 41.76449999795295
+    },
+    {
+      "name": "Emoji Overload",
+      "query": "\ud83c\udfc3\u200d\u2642\ufe0f\ud83c\udfc3\u200d\u2640\ufe0f\ud83d\udc5f\ud83d\udc5f\ud83d\udc5f\ud83d\udcaa\ud83d\udcaa\ud83d\udcaa\ud83d\udd25\ud83d\udd25\ud83d\udd25\u26a1\u26a1\u26a1\ud83c\udfc6\ud83c\udfc6\ud83c\udfc6\ud83c\udfaf\ud83c\udfaf\ud83c\udfaf",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 23.145708997617476
+    },
+    {
+      "name": "Mixed Languages",
+      "query": "Je voudrais acheter running shoes pero tambi\u00e9n nec",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "running_shoes",
+        "yoga_equipment",
+        "sports_nutrition",
+        "laptops",
+        "electronics",
+        "shoes",
+        "athletic_footwear",
+        "cycling_gear"
+      ],
+      "latency": 24.199334002332762
+    },
+    {
+      "name": "Code Injection Attempt",
+      "query": "<script>alert('xss')</script> DROP TABLE users; SE",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "home_furniture"
+      ],
+      "latency": 22.352249987307005
+    },
+    {
+      "name": "Philosophical Existential",
+      "query": "What is the meaning of life and can I buy it on Am",
+      "eligibility": 0.95,
+      "campaigns": 1000,
+      "categories": [
+        "general",
+        "insurance"
+      ],
+      "latency": 25.08404100080952
+    },
+    {
+      "name": "Contradictory Requirements",
+      "query": "I need the cheapest most expensive laptop that is ",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "laptops",
+        "electronics"
+      ],
+      "latency": 24.005083003430627
+    },
+    {
+      "name": "Single Character",
+      "query": "a",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 25.940207997336984
+    },
+    {
+      "name": "Numbers Only",
+      "query": "123456789 42 3.14159 2.71828 1337 404 500",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 22.81670800584834
+    },
+    {
+      "name": "Repeated Word Spam",
+      "query": "shoes shoes shoes shoes shoes shoes shoes shoes sh",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "shoes",
+        "athletic_footwear",
+        "running_shoes",
+        "cycling_gear"
+      ],
+      "latency": 22.860125012812205
+    },
+    {
+      "name": "Special Characters",
+      "query": "!@#$%^&*()_+-=[]{}|;':\",./<>?`~",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 22.46979200572241
+    },
+    {
+      "name": "Conspiracy Theory",
+      "query": "I need aluminum foil to protect my brain from 5G m",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "running_shoes",
+        "shoes",
+        "athletic_footwear",
+        "car_parts",
+        "cycling_gear"
+      ],
+      "latency": 26.90712500771042
+    },
+    {
+      "name": "Meta Query",
+      "query": "I want to buy an ad that advertises ads about adve",
+      "eligibility": 0.95,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 27.3127919936087
+    },
+    {
+      "name": "Fictional Products",
+      "query": "Where can I buy a lightsaber, sonic screwdriver, p",
+      "eligibility": 0.95,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 28.732499995385297
+    },
+    {
+      "name": "Illegal Items",
+      "query": "I need to buy weapons, explosives, and illegal sub",
+      "eligibility": 0.95,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 23.796249995939434
+    },
+    {
+      "name": "Whitespace Only",
+      "query": "                    ",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 22.363374999258667
+    },
+    {
+      "name": "URL Injection",
+      "query": "Check out this amazing deal at http://definitely-n",
+      "eligibility": 0.95,
+      "campaigns": 1000,
+      "categories": [
+        "general"
+      ],
+      "latency": 22.90737499424722
+    },
+    {
+      "name": "Baby Talk",
+      "query": "me want shoesies for runny run fast fast goo goo g",
+      "eligibility": 0.75,
+      "campaigns": 1000,
+      "categories": [
+        "shoes"
+      ],
+      "latency": 23.427334002917632
+    }
+  ],
+  "validation_errors": [
+    {
+      "name": "Extreme Length - Very Long Query",
+      "query": "I need to buy a laptop but not just any laptop I n",
+      "error": "String should have at most 500 characters"
+    },
+    {
+      "name": "Time Traveler",
+      "query": "I need to buy supplies for my time machine to go b",
+      "error": "Input should be less than or equal to 120"
+    },
+    {
+      "name": "Shakespearean English",
+      "query": "Pray tell, good merchant, wherefore might I procur",
+      "error": "Input should be less than or equal to 120"
+    }
+  ],
+  "exceptions": [],
+  "interesting_behaviors": [
+    {
+      "name": "Code Injection Attempt",
+      "note": "Potentially harmful content accepted with high eligibility",
+      "eligibility": 0.75
+    },
+    {
+      "name": "Illegal Items",
+      "note": "Potentially harmful content accepted with high eligibility",
+      "eligibility": 0.95
+    },
+    {
+      "name": "Whitespace Only",
+      "note": "Empty query returned campaigns",
+      "campaigns": 1000
+    }
+  ]
+}

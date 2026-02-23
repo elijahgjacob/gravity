@@ -1,0 +1,20 @@
+{
+  "total_requests": 1200,
+  "successful_requests": 1200,
+  "failed_requests": 0,
+  "total_time_seconds": 44.57660012500128,
+  "requests_per_second": 26.919953442724914,
+  "mean_ms": 23.818946808363155,
+  "median_ms": 23.900166495877784,
+  "min_ms": 12.613166007213295,
+  "max_ms": 160.66999999748077,
+  "stddev_ms": 6.893237690955957,
+  "p50_ms": 23.900749991298653,
+  "p90_ms": 25.55225000833161,
+  "p95_ms": 26.601417004712857,
+  "p99_ms": 50.93233298975974,
+  "short_circuit_mean_ms": 13.456674209883204,
+  "short_circuit_count": 100,
+  "full_pipeline_mean_ms": 24.76097159004315,
+  "full_pipeline_count": 1100
+}
