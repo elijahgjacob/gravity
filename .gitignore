@@ -53,3 +53,8 @@ htmlcov/
 
 # Logs
 *.log
+
+# Neo4j / Graphiti
+neo4j_data/
+neo4j_logs/
+*.tar.gz
