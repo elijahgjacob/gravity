@@ -25,6 +25,15 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     
+    # Graphiti settings
+    GRAPHITI_ENABLED: bool = False
+    GRAPHITI_NEO4J_URI: str = "bolt://localhost:7687"
+    GRAPHITI_NEO4J_USER: str = "neo4j"
+    GRAPHITI_NEO4J_PASSWORD: str = "password"
+    OPENROUTER_API_KEY: str = ""
+    GRAPHITI_LLM_MODEL: str = "anthropic/claude-3.5-sonnet"
+    GRAPHITI_NAMESPACE: str = "ad_retrieval"
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
