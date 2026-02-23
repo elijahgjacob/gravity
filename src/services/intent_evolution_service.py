@@ -1,5 +1,6 @@
 """Service for querying and analyzing intent evolution from Graphiti knowledge graph."""
 
+import re
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from src.repositories.graphiti_repository import GraphitiRepository
@@ -64,25 +65,133 @@ class IntentEvolutionService:
                 return cached['data']
         
         try:
-            # Query Neo4j for session episodes
-            # This would use Graphiti's search or Neo4j Cypher queries
-            # For now, we'll return a structured placeholder that can be
-            # implemented once we have real data
+            # Query Neo4j for all episodes in this session
+            query = """
+            MATCH (e:Episodic)
+            WHERE e.name CONTAINS $session_id
+            RETURN e.content as content, e.created_at as created_at, e.name as name
+            ORDER BY e.created_at ASC
+            """
+            
+            episodes = await self.repository.execute_cypher(
+                query, 
+                {"session_id": session_id}
+            )
+            
+            if not episodes:
+                logger.debug(f"No episodes found for session {session_id}")
+                return self._default_trajectory(session_id)
+            
+            # Parse episodes to extract signals
+            stages = []
+            urgency_indicators = []
+            budget_mentions = []
+            specific_products = []
+            hesitation_signals = []
+            
+            for episode in episodes:
+                content = episode.get('content', '')
+                
+                # Extract ad eligibility to determine stage
+                eligibility_match = re.search(r'Ad Eligibility:\s*([\d.]+)', content)
+                if eligibility_match:
+                    eligibility = float(eligibility_match.group(1))
+                    
+                    # Map eligibility to intent stage
+                    if eligibility >= 0.9:
+                        stages.append('PURCHASE')
+                    elif eligibility >= 0.75:
+                        stages.append('CONSIDERATION')
+                    elif eligibility >= 0.5:
+                        stages.append('RESEARCH')
+                    else:
+                        stages.append('AWARENESS')
+                
+                # Extract current query for signal analysis
+                query_match = re.search(r'Current Query:\s*"([^"]+)"', content)
+                if query_match:
+                    query_text = query_match.group(1).lower()
+                    
+                    # Detect urgency indicators
+                    urgency_keywords = ['need', 'urgent', 'today', 'now', 'asap', 'soon', 'immediately']
+                    if any(keyword in query_text for keyword in urgency_keywords):
+                        urgency_indicators.append(query_text)
+                    
+                    # Detect budget mentions
+                    if re.search(r'\$\d+|under \$|budget|cheap|affordable|value', query_text):
+                        budget_mentions.append(query_text)
+                    
+                    # Detect specific product mentions (brand + model)
+                    if re.search(r'(nike|adidas|asics|brooks|hoka|salomon|new balance)\s+\w+\s*\d*', query_text):
+                        specific_products.append(query_text)
+                    
+                    # Detect hesitation signals
+                    hesitation_keywords = ['maybe', 'not sure', 'thinking about', 'considering', 'should i']
+                    if any(keyword in query_text for keyword in hesitation_keywords):
+                        hesitation_signals.append(query_text)
+            
+            # Calculate specificity level
+            specificity_level = 'low'
+            if len(specific_products) >= 2:
+                specificity_level = 'high'
+            elif len(specific_products) >= 1:
+                specificity_level = 'medium'
+            
+            # Calculate velocity (stages per hour)
+            velocity = 0.0
+            time_span_minutes = 0
+            if len(episodes) > 1:
+                # Handle Neo4j DateTime objects or ISO strings
+                first_created = episodes[0]['created_at']
+                last_created = episodes[-1]['created_at']
+                
+                # Convert to datetime if needed
+                if hasattr(first_created, 'to_native'):
+                    # Neo4j DateTime object
+                    first_time = first_created.to_native()
+                    last_time = last_created.to_native()
+                elif isinstance(first_created, str):
+                    # ISO string
+                    first_time = datetime.fromisoformat(first_created.replace('Z', '+00:00'))
+                    last_time = datetime.fromisoformat(last_created.replace('Z', '+00:00'))
+                else:
+                    # Already datetime
+                    first_time = first_created
+                    last_time = last_created
+                
+                time_span = (last_time - first_time).total_seconds()
+                time_span_minutes = time_span / 60
+                
+                # Calculate unique stages
+                unique_stages = len(set(stages))
+                if time_span > 0:
+                    velocity = (unique_stages / (time_span / 3600))  # stages per hour
+            
+            # Calculate progression (stage transitions)
+            progression = []
+            for i in range(1, len(stages)):
+                if stages[i] != stages[i-1]:
+                    progression.append({
+                        'from': stages[i-1],
+                        'to': stages[i],
+                        'query_number': i + 1
+                    })
             
             trajectory = {
                 'session_id': session_id,
-                'stages': [],
-                'progression': [],
-                'velocity': 0.0,
-                'current_stage': 'AWARENESS',
+                'stages': stages,
+                'progression': progression,
+                'velocity': round(velocity, 2),
+                'current_stage': stages[-1] if stages else 'AWARENESS',
                 'signals': {
-                    'urgency_indicators': [],
-                    'budget_mentions': [],
-                    'specificity_level': 'low',
-                    'hesitation_signals': []
+                    'urgency_indicators': urgency_indicators,
+                    'budget_mentions': budget_mentions,
+                    'specificity_level': specificity_level,
+                    'specific_products': specific_products,
+                    'hesitation_signals': hesitation_signals
                 },
-                'query_count': 0,
-                'time_span_minutes': 0
+                'query_count': len(episodes),
+                'time_span_minutes': round(time_span_minutes, 2)
             }
             
             # Cache the result
@@ -91,22 +200,35 @@ class IntentEvolutionService:
                 'data': trajectory
             }
             
-            logger.debug(f"Computed trajectory for session {session_id}")
+            logger.debug(
+                f"Computed trajectory for {session_id}: "
+                f"{len(episodes)} queries, stage={trajectory['current_stage']}, "
+                f"velocity={velocity:.2f}"
+            )
             return trajectory
             
         except Exception as e:
-            logger.error(f"Failed to get session trajectory: {e}")
-            # Return default trajectory on error
-            return {
-                'session_id': session_id,
-                'stages': ['AWARENESS'],
-                'progression': [],
-                'velocity': 0.0,
-                'current_stage': 'AWARENESS',
-                'signals': {},
-                'query_count': 0,
-                'time_span_minutes': 0
-            }
+            logger.error(f"Failed to get session trajectory: {e}", exc_info=True)
+            return self._default_trajectory(session_id)
+    
+    def _default_trajectory(self, session_id: str) -> Dict:
+        """Return default trajectory when no data available."""
+        return {
+            'session_id': session_id,
+            'stages': ['AWARENESS'],
+            'progression': [],
+            'velocity': 0.0,
+            'current_stage': 'AWARENESS',
+            'signals': {
+                'urgency_indicators': [],
+                'budget_mentions': [],
+                'specificity_level': 'low',
+                'specific_products': [],
+                'hesitation_signals': []
+            },
+            'query_count': 0,
+            'time_span_minutes': 0
+        }
     
     async def predict_next_intent_stage(self, session_id: str) -> str:
         """

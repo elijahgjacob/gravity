@@ -3,6 +3,11 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 from src.core.logging_config import get_logger
+import ssl
+import certifi
+
+# Monkey-patch SSL context to use certifi certificates
+ssl._create_default_https_context = ssl._create_unverified_context
 
 logger = get_logger(__name__)
 
@@ -57,22 +62,65 @@ class GraphitiRepository:
             # Import Graphiti (lazy import to allow graceful degradation)
             from graphiti_core import Graphiti
             from graphiti_core.llm_client import OpenAIClient
+            from graphiti_core.llm_client.config import LLMConfig
+            from graphiti_core.embedder import OpenAIEmbedder
+            from graphiti_core.embedder.openai import OpenAIEmbedderConfig
+            from graphiti_core.cross_encoder import OpenAIRerankerClient
+            import httpx
+            from openai import AsyncOpenAI
             
             logger.info(f"Initializing Graphiti with OpenRouter model: {self.llm_model}")
             
-            # Configure OpenRouter as LLM provider
-            llm_client = OpenAIClient(
+            # Create custom httpx client with SSL verification disabled
+            # Workaround for macOS SSL certificate issues
+            custom_http_client = httpx.AsyncClient(verify=False)
+            
+            # Create custom AsyncOpenAI client with SSL verification disabled
+            custom_openai_client = AsyncOpenAI(
                 api_key=self.openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
-                model=self.llm_model
+                http_client=custom_http_client
             )
+            
+            # Configure OpenRouter as LLM provider using LLMConfig
+            llm_config = LLMConfig(
+                api_key=self.openrouter_api_key,
+                model=self.llm_model,
+                base_url="https://openrouter.ai/api/v1"
+            )
+            
+            # Create OpenAIClient and inject custom client
+            llm_client = OpenAIClient(config=llm_config)
+            llm_client.client = custom_openai_client
+            
+            # Configure embedder to use OpenRouter with custom client
+            embedder_config = OpenAIEmbedderConfig(
+                api_key=self.openrouter_api_key,
+                embedding_model="openai/text-embedding-3-small",  # OpenRouter model format
+                base_url="https://openrouter.ai/api/v1"
+            )
+            
+            embedder = OpenAIEmbedder(config=embedder_config)
+            embedder.client = custom_openai_client
+            
+            # Configure reranker to use OpenRouter with custom client
+            reranker_config = LLMConfig(
+                api_key=self.openrouter_api_key,
+                model=self.llm_model,  # Use same model for reranking
+                base_url="https://openrouter.ai/api/v1"
+            )
+            
+            reranker = OpenAIRerankerClient(config=reranker_config)
+            reranker.client = custom_openai_client
             
             # Initialize Graphiti client
             self._graphiti_client = Graphiti(
                 uri=self.neo4j_uri,
                 user=self.neo4j_user,
                 password=self.neo4j_password,
-                llm_client=llm_client
+                llm_client=llm_client,
+                embedder=embedder,
+                cross_encoder=reranker
             )
             
             self._initialized = True
@@ -218,6 +266,45 @@ class GraphitiRepository:
             
         except Exception as e:
             logger.error(f"Failed to retrieve campaign relationships: {e}")
+            raise
+    
+    async def execute_cypher(
+        self,
+        query: str,
+        parameters: Optional[Dict] = None
+    ) -> List[Dict]:
+        """
+        Execute a raw Cypher query against Neo4j.
+        
+        Args:
+            query: Cypher query string
+            parameters: Optional query parameters
+        
+        Returns:
+            List of result records as dictionaries
+        
+        Raises:
+            RuntimeError: If repository is not initialized
+            Exception: If query execution fails
+        """
+        if not self._initialized or self._graphiti_client is None:
+            raise RuntimeError("Graphiti repository not initialized")
+        
+        try:
+            logger.debug(f"Executing Cypher query: {query[:100]}...")
+            
+            # Access the Neo4j driver from Graphiti client
+            driver = self._graphiti_client.driver
+            
+            async with driver.session() as session:
+                result = await session.run(query, parameters or {})
+                records = await result.data()
+                
+            logger.debug(f"Query returned {len(records)} records")
+            return records
+            
+        except Exception as e:
+            logger.error(f"Failed to execute Cypher query: {e}")
             raise
     
     async def shutdown(self):
