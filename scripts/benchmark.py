@@ -14,14 +14,27 @@ import argparse
 import json
 import statistics
 import time
+import sys
 from pathlib import Path
 from typing import List, Dict
 import requests
 
+# Add project root to path if running from scripts directory
+script_dir = Path(__file__).parent
+project_root = script_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 
 def load_test_queries(filepath: str = "tests/test_queries.json") -> List[Dict]:
     """Load test queries from JSON file."""
-    with open(filepath, 'r') as f:
+    # Try relative to current directory first
+    path = Path(filepath)
+    if not path.exists():
+        # Try relative to project root
+        path = project_root / filepath
+    
+    with open(path, 'r') as f:
         return json.load(f)
 
 
