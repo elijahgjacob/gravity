@@ -96,17 +96,20 @@ class RetrievalController:
             context_dict
         )
         
-        eligibility, categories = await asyncio.gather(
+        eligibility_result, categories = await asyncio.gather(
             eligibility_task, 
             categories_task
         )
+        
+        # Unpack eligibility result (score, rejection_reason)
+        eligibility, rejection_reason = eligibility_result
         
         logger.debug(f"Eligibility: {eligibility}, Categories: {categories}")
         
         # Short-circuit if ad_eligibility is 0.0
         if eligibility == 0.0:
             latency_ms = (time.perf_counter() - start_time) * 1000
-            logger.info(f"Short-circuited (eligibility=0.0) in {latency_ms:.2f}ms")
+            logger.info(f"Short-circuited (eligibility=0.0) in {latency_ms:.2f}ms - Reason: {rejection_reason}")
             
             return RetrievalResponse(
                 ad_eligibility=0.0,
@@ -115,7 +118,7 @@ class RetrievalController:
                 latency_ms=latency_ms,
                 metadata={
                     "short_circuited": True,
-                    "reason": "Zero eligibility score"
+                    "reason": rejection_reason or "Zero eligibility score"
                 }
             )
         

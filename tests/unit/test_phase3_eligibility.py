@@ -125,18 +125,18 @@ buy drugs
     async def test_blocklist_queries_return_zero(self, eligibility_service):
         """Test that blocklisted queries return 0.0"""
         # Self-harm queries
-        score = await eligibility_service.score("I want to commit suicide")
+        score, _ = await eligibility_service.score("I want to commit suicide")
         assert score == 0.0
         
-        score = await eligibility_service.score("how to kill myself")
+        score, _ = await eligibility_service.score("how to kill myself")
         assert score == 0.0
         
         # Explicit content
-        score = await eligibility_service.score("porn videos")
+        score, _ = await eligibility_service.score("porn videos")
         assert score == 0.0
         
         # Illegal activities
-        score = await eligibility_service.score("how to make bomb")
+        score, _ = await eligibility_service.score("how to make bomb")
         assert score == 0.0
     
     @pytest.mark.asyncio
@@ -149,60 +149,60 @@ buy drugs
         ]
         
         for query, description in test_cases:
-            score = await eligibility_service.score(query)
+            score, _ = await eligibility_service.score(query)
             assert 0.3 <= score <= 0.5, f"{description}: '{query}' got score {score}, expected 0.3-0.5"
     
     @pytest.mark.asyncio
     async def test_commercial_queries_return_high_score(self, eligibility_service):
         """Test that commercial intent queries return 0.8-1.0"""
         # Purchase intent
-        score = await eligibility_service.score("buy running shoes")
+        score, _ = await eligibility_service.score("buy running shoes")
         assert 0.8 <= score <= 1.0
         
-        score = await eligibility_service.score("where to purchase laptop")
+        score, _ = await eligibility_service.score("where to purchase laptop")
         assert 0.8 <= score <= 1.0
         
         # Research intent
-        score = await eligibility_service.score("best running shoes for flat feet")
+        score, _ = await eligibility_service.score("best running shoes for flat feet")
         assert 0.8 <= score <= 1.0
         
-        score = await eligibility_service.score("compare iPhone vs Android")
+        score, _ = await eligibility_service.score("compare iPhone vs Android")
         assert 0.8 <= score <= 1.0
         
         # Price intent
-        score = await eligibility_service.score("cheap flights to Paris")
+        score, _ = await eligibility_service.score("cheap flights to Paris")
         assert 0.8 <= score <= 1.0
         
-        score = await eligibility_service.score("how much does a MacBook cost")
+        score, _ = await eligibility_service.score("how much does a MacBook cost")
         assert 0.8 <= score <= 1.0
     
     @pytest.mark.asyncio
     async def test_informational_queries_return_medium_score(self, eligibility_service):
         """Test that informational queries return 0.7-0.85"""
         # General questions
-        score = await eligibility_service.score("What is the history of the marathon?")
+        score, _ = await eligibility_service.score("What is the history of the marathon?")
         assert 0.7 <= score <= 0.85
         
-        score = await eligibility_service.score("How do I train for a 5k?")
+        score, _ = await eligibility_service.score("How do I train for a 5k?")
         assert 0.7 <= score <= 0.85
         
-        score = await eligibility_service.score("Why do runners get blisters?")
+        score, _ = await eligibility_service.score("Why do runners get blisters?")
         assert 0.7 <= score <= 0.85
     
     @pytest.mark.asyncio
     async def test_edge_cases(self, eligibility_service):
         """Test edge cases and boundary conditions"""
         # Empty query
-        score = await eligibility_service.score("")
+        score, _ = await eligibility_service.score("")
         assert 0.0 <= score <= 1.0
         
         # Very long query
         long_query = "running shoes " * 100
-        score = await eligibility_service.score(long_query)
+        score, _ = await eligibility_service.score(long_query)
         assert 0.0 <= score <= 1.0
         
         # Special characters
-        score = await eligibility_service.score("What's the best running shoe?!?")
+        score, _ = await eligibility_service.score("What's the best running shoe?!?")
         assert 0.8 <= score <= 1.0
     
     @pytest.mark.asyncio
@@ -215,7 +215,7 @@ buy drugs
             "interests": ["fitness", "running"]
         }
         
-        score = await eligibility_service.score("best running shoes", context)
+        score, _ = await eligibility_service.score("best running shoes", context)
         assert 0.8 <= score <= 1.0
     
     @pytest.mark.asyncio
@@ -256,7 +256,7 @@ class TestEligibilityServiceRealWorldQueries:
         ]
         
         for query in high_eligibility_queries:
-            score = await eligibility_service.score(query)
+            score, _ = await eligibility_service.score(query)
             assert score >= 0.8, f"Query '{query}' should have high eligibility, got {score}"
     
     @pytest.mark.asyncio
@@ -271,7 +271,7 @@ class TestEligibilityServiceRealWorldQueries:
         ]
         
         for query in medium_eligibility_queries:
-            score = await eligibility_service.score(query)
+            score, _ = await eligibility_service.score(query)
             assert 0.7 <= score <= 0.85, f"Query '{query}' should have medium eligibility, got {score}"
     
     @pytest.mark.asyncio
@@ -286,7 +286,7 @@ class TestEligibilityServiceRealWorldQueries:
         ]
         
         for query in low_eligibility_queries:
-            score = await eligibility_service.score(query)
+            score, _ = await eligibility_service.score(query)
             assert 0.3 <= score <= 0.5, f"Query '{query}' should have low eligibility, got {score}"
     
     @pytest.mark.asyncio
@@ -299,7 +299,7 @@ class TestEligibilityServiceRealWorldQueries:
         ]
         
         for query in zero_eligibility_queries:
-            score = await eligibility_service.score(query)
+            score, _ = await eligibility_service.score(query)
             assert score == 0.0, f"Query '{query}' should have zero eligibility, got {score}"
 
 

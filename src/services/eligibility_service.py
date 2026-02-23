@@ -6,8 +6,9 @@ by analyzing content for safety concerns, sensitive topics, and commercial inten
 """
 
 import re
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from src.repositories.blocklist_repository import BlocklistRepository
+from src.services.content_safety_service import ContentSafetyService
 
 
 class EligibilityService:
@@ -23,18 +24,20 @@ class EligibilityService:
     - 0.8-1.0: Commercial intent (appropriate for ads)
     """
     
-    def __init__(self, blocklist_repo: BlocklistRepository):
+    def __init__(self, blocklist_repo: BlocklistRepository, content_safety_service: Optional[ContentSafetyService] = None):
         """
         Initialize the eligibility service.
         
         Args:
             blocklist_repo: Repository for accessing safety blocklist
+            content_safety_service: Optional content safety service for additional validation
         """
         self.blocklist_repo = blocklist_repo
+        self.content_safety_service = content_safety_service or ContentSafetyService()
         self.sensitive_patterns = self._compile_sensitive_patterns()
         self.commercial_patterns = self._compile_commercial_patterns()
     
-    async def score(self, query: str, context: Optional[dict] = None) -> float:
+    async def score(self, query: str, context: Optional[dict] = None) -> Tuple[float, Optional[str]]:
         """
         Score query eligibility for ads.
         
@@ -43,31 +46,38 @@ class EligibilityService:
             context: Optional user context (demographics, interests, etc.)
         
         Returns:
-            Score from 0.0 to 1.0:
-            - 0.0 = Do not show ads (harmful/inappropriate)
-            - 0.4-0.7 = Sensitive context
-            - 0.8-1.0 = Appropriate for ads
+            Tuple of (score, rejection_reason):
+            - score: 0.0 to 1.0 (0.0 = blocked, 0.4-0.7 = sensitive, 0.8-1.0 = appropriate)
+            - rejection_reason: Human-readable reason if score is 0.0, None otherwise
         """
+        # Priority 0: Content safety validation (NEW)
+        # Check for illegal items, security threats, low quality queries
+        is_safe, violation_type, reason = self.content_safety_service.validate_query(query)
+        if not is_safe:
+            return 0.0, reason
+        
+        # Sanitize query for further processing
+        query = self.content_safety_service.sanitize_query(query)
         query_lower = query.lower()
         
         # Priority 1: Check blocklist (0.0 cases)
         # These are hard blocks for safety: self-harm, violence, NSFW, etc.
         if self.blocklist_repo.contains_blocked_content(query_lower):
-            return 0.0
+            return 0.0, "Query contains blocked content (safety violation)"
         
         # Priority 2: Check sensitive topics (0.3-0.5)
         # Financial distress, grief, mental health crises
         if self._is_sensitive(query_lower):
-            return 0.4
+            return 0.4, None
         
         # Priority 3: Check commercial intent signals (0.8-1.0)
         # "buy", "best", "review", "price", etc.
         if self._has_commercial_intent(query_lower):
-            return 0.95
+            return 0.95, None
         
         # Default: Informational queries (0.7-0.85)
         # General questions, how-to queries, etc.
-        return 0.75
+        return 0.75, None
     
     def _is_sensitive(self, query: str) -> bool:
         """

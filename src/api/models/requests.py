@@ -1,13 +1,16 @@
 """Request models for the Ad Retrieval API."""
 
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 
 class UserContext(BaseModel):
     """User context information for ad targeting."""
     
-    gender: Optional[str] = Field(None, description="User gender")
+    gender: Optional[Literal["male", "female", "non-binary", "other", "prefer_not_to_say"]] = Field(
+        None, 
+        description="User gender (must be one of: male, female, non-binary, other, prefer_not_to_say)"
+    )
     age: Optional[int] = Field(None, ge=0, le=120, description="User age")
     location: Optional[str] = Field(None, description="User location (e.g., 'San Francisco, CA')")
     interests: Optional[List[str]] = Field(None, description="User interests")

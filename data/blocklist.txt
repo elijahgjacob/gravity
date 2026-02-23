@@ -25,15 +25,32 @@ racist
 sexist
 homophobic
 
-# Illegal activities
+# Illegal activities - Explosives
 make bomb
 build bomb
 pipe bomb
 how to make explosives
+make explosives
+build explosive
+
+# Illegal activities - Weapons (specific threats)
+buy illegal weapons
+sell weapons illegally
+unregistered firearms
+
+# Illegal activities - Drugs
 buy drugs illegally
 sell drugs
-illegal weapons
+buy cocaine
+buy heroin
+buy methamphetamine
+illegal narcotics
+
+# Illegal activities - Hacking/Cybercrime
 how to hack
+steal passwords
+credit card fraud
+identity theft
 
 # Medical emergencies
 heart attack help

@@ -37,7 +37,7 @@ class TestPhase3Integration:
             "interests": ["fitness", "running"]
         }
         
-        score = await eligibility_service.score(query, context)
+        score, _ = await eligibility_service.score(query, context)
         
         # Should have high eligibility for commercial query
         assert 0.8 <= score <= 1.0
@@ -48,7 +48,7 @@ class TestPhase3Integration:
         """Test complete flow for blocked query"""
         query = "I want to commit suicide"
         
-        score = await eligibility_service.score(query)
+        score, _ = await eligibility_service.score(query)
         
         # Should be blocked
         assert score == 0.0
@@ -58,7 +58,7 @@ class TestPhase3Integration:
         """Test complete flow for sensitive query"""
         query = "I just got fired from my job and need help"
         
-        score = await eligibility_service.score(query)
+        score, _ = await eligibility_service.score(query)
         
         # Should have low eligibility for sensitive content
         assert 0.3 <= score <= 0.5
@@ -68,7 +68,7 @@ class TestPhase3Integration:
         """Test complete flow for informational query"""
         query = "What is the history of the marathon?"
         
-        score = await eligibility_service.score(query)
+        score, _ = await eligibility_service.score(query)
         
         # Should have medium eligibility for informational content
         assert 0.7 <= score <= 0.85
@@ -86,11 +86,11 @@ class TestPhase3Integration:
         for query_data in queries:
             if isinstance(query_data, tuple):
                 query, expected_score = query_data
-                score = await eligibility_service.score(query)
+                score, _ = await eligibility_service.score(query)
                 assert score == expected_score, f"Query '{query}' got {score}, expected {expected_score}"
             else:
                 query = query_data
-                score = await eligibility_service.score(query)
+                score, _ = await eligibility_service.score(query)
                 assert 0.0 <= score <= 1.0, f"Query '{query}' got invalid score {score}"
     
     @pytest.mark.asyncio
@@ -129,7 +129,7 @@ class TestPhase3Integration:
         ]
         
         for context in contexts:
-            score = await eligibility_service.score(query, context)
+            score, _ = await eligibility_service.score(query, context)
             assert score == 0.95, f"Context {context} changed score to {score}"
 
 
