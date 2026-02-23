@@ -14,6 +14,10 @@ This system processes user queries with optional context to:
 
 ## Architecture
 
+### System Architecture Diagram
+
+![Architecture Diagram](assets/architecture-diagram.png)
+
 ### RCSR Pattern
 
 The system follows the **Routes-Controllers-Services-Repositories** architecture:
