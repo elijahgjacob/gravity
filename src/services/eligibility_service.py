@@ -138,7 +138,7 @@ class EligibilityService:
             
             # Medical emergencies and health crises
             re.compile(r'\b(heart attack|stroke|overdose|emergency room)\b', re.IGNORECASE),
-            re.compile(r'\b(need|require|seeking)\s+(urgent\s+)?(medical|health|doctor|hospital)\s+(help|care|assistance|attention)\b', re.IGNORECASE),
+            re.compile(r'\b(need|require|seeking)\s+((urgent|severe|serious|critical|immediate|emergency)\s+)?(medical|health|doctor|hospital)\s+(help|care|assistance|attention)\b', re.IGNORECASE),
             re.compile(r'\b(medical|health)\s+(emergency|crisis)\b', re.IGNORECASE),
             re.compile(r'\b(i\'?m\s+)?(sick|ill|injured|hurt)\s+(and\s+)?(need|require)\s+(help|doctor|hospital)\b', re.IGNORECASE),
         ]
