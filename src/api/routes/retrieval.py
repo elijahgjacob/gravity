@@ -1,9 +1,11 @@
 """Retrieval endpoint routes."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
 from src.api.models.requests import RetrievalRequest
 from src.api.models.responses import RetrievalResponse
+from src.controllers.retrieval_controller import RetrievalController
+from src.core.dependencies import get_retrieval_controller
 from src.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -44,12 +46,16 @@ router = APIRouter()
         500: {"description": "Internal server error"}
     }
 )
-async def retrieve_ads(request: RetrievalRequest) -> RetrievalResponse:
+async def retrieve_ads(
+    request: RetrievalRequest,
+    controller: RetrievalController = Depends(get_retrieval_controller)
+) -> RetrievalResponse:
     """
     Retrieve relevant ad campaigns for a user query.
     
     Args:
         request: Retrieval request with query and optional context
+        controller: Injected retrieval controller
     
     Returns:
         Retrieval response with campaigns and metadata
@@ -57,24 +63,8 @@ async def retrieve_ads(request: RetrievalRequest) -> RetrievalResponse:
     Raises:
         HTTPException: If processing fails
     """
-    logger.info(f"Received retrieval request: query='{request.query[:50]}...'")
-    
     try:
-        # TODO: Phase 7 will implement actual controller logic
-        # For now, return a mock response
-        
-        response = RetrievalResponse(
-            ad_eligibility=0.75,
-            extracted_categories=["general"],
-            campaigns=[],
-            latency_ms=0.0,
-            metadata={
-                "status": "Phase 2 - API structure only",
-                "note": "Controller implementation pending (Phase 7)"
-            }
-        )
-        
-        logger.info(f"Returning response: eligibility={response.ad_eligibility}")
+        response = await controller.retrieve(request)
         return response
         
     except Exception as e:

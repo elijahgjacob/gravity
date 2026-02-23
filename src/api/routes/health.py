@@ -46,11 +46,12 @@ async def readiness_check() -> dict:
     Readiness check endpoint.
     
     Returns:
-        Readiness status with dependency details
+        Readiness status with dependency details and statistics
     """
     deps_status = get_dependencies_status()
     
     return {
         "ready": deps_status["initialized"],
-        "dependencies": deps_status["repositories"]
+        "dependencies": deps_status["repositories"],
+        "stats": deps_status.get("stats", {})
     }
