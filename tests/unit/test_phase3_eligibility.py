@@ -146,6 +146,10 @@ buy drugs
             ("I just got fired from my job", "Financial distress - fired"),
             ("I'm feeling really depressed", "Mental health - depressed"),
             ("having a panic attack", "Mental health - panic attack"),
+            ("I need medical help", "Medical emergency - need help"),
+            ("medical emergency", "Medical emergency - explicit"),
+            ("health crisis", "Health crisis"),
+            ("seeking medical assistance", "Medical - seeking assistance"),
         ]
         
         for query, description in test_cases:

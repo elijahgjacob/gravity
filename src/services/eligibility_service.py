@@ -87,7 +87,7 @@ class EligibilityService:
         - Financial distress (bankruptcy, unemployment, debt)
         - Grief and loss (death, funeral, passed away)
         - Mental health crises (depression, anxiety, panic)
-        - Medical emergencies (not in blocklist but sensitive)
+        - Medical emergencies and health crises (need medical help, health emergency)
         
         Args:
             query: Lowercased query text
@@ -136,8 +136,11 @@ class EligibilityService:
             re.compile(r'\b(mental breakdown|nervous breakdown|suicidal thoughts)\b', re.IGNORECASE),
             re.compile(r'\b(can\'?t cope|feeling hopeless|want to die)\b', re.IGNORECASE),
             
-            # Medical emergencies (borderline)
+            # Medical emergencies and health crises
             re.compile(r'\b(heart attack|stroke|overdose|emergency room)\b', re.IGNORECASE),
+            re.compile(r'\b(need|require|seeking)\s+(urgent\s+)?(medical|health|doctor|hospital)\s+(help|care|assistance|attention)\b', re.IGNORECASE),
+            re.compile(r'\b(medical|health)\s+(emergency|crisis)\b', re.IGNORECASE),
+            re.compile(r'\b(i\'?m\s+)?(sick|ill|injured|hurt)\s+(and\s+)?(need|require)\s+(help|doctor|hospital)\b', re.IGNORECASE),
         ]
         return patterns
     
