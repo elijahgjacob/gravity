@@ -39,6 +39,14 @@ class RetrievalRequest(BaseModel):
         None,
         description="Optional user context for targeting"
     )
+    session_id: Optional[str] = Field(
+        None,
+        description="Session ID for conversation tracking and intent evolution"
+    )
+    user_id: Optional[str] = Field(
+        None,
+        description="User ID for cross-session tracking and personalization"
+    )
     
     class Config:
         json_schema_extra = {
