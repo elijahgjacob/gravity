@@ -10,11 +10,13 @@ from src.services.embedding_service import EmbeddingService
 from src.services.search_service import SearchService
 from src.services.ranking_service import RankingService
 from src.services.graphiti_service import GraphitiService
+from src.services.intent_evolution_service import IntentEvolutionService
 from src.repositories.blocklist_repository import BlocklistRepository
 from src.repositories.taxonomy_repository import TaxonomyRepository
 from src.repositories.vector_repository import VectorRepository
 from src.repositories.campaign_repository import CampaignRepository
 from src.repositories.graphiti_repository import GraphitiRepository
+from src.repositories.session_state_repository import SessionStateRepository
 from src.core.config import settings
 from src.core.logging_config import get_logger
 
@@ -26,6 +28,7 @@ _taxonomy_repo: Optional[TaxonomyRepository] = None
 _vector_repo: Optional[VectorRepository] = None
 _campaign_repo: Optional[CampaignRepository] = None
 _graphiti_repo: Optional[GraphitiRepository] = None
+_session_state_repo: Optional[SessionStateRepository] = None
 _repositories_initialized = False
 
 
@@ -43,7 +46,7 @@ async def init_dependencies():
     Called once during FastAPI startup event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _graphiti_repo, _repositories_initialized
+    global _graphiti_repo, _session_state_repo, _repositories_initialized
     
     if _repositories_initialized:
         logger.warning("Dependencies already initialized")
@@ -64,6 +67,10 @@ async def init_dependencies():
         
         _campaign_repo = CampaignRepository(settings.CAMPAIGNS_PATH)
         logger.info("✓ Campaign repository initialized")
+        
+        # Initialize session state repository (in-memory, always available)
+        _session_state_repo = SessionStateRepository(ttl_minutes=30)
+        logger.info("✓ Session state repository initialized")
         
         # Initialize Graphiti (optional - graceful degradation)
         if settings.GRAPHITI_ENABLED:
@@ -118,7 +125,15 @@ def get_retrieval_controller() -> RetrievalController:
     category_service = CategoryService(_taxonomy_repo)
     embedding_service = EmbeddingService(settings.EMBEDDING_MODEL)
     search_service = SearchService(_vector_repo, _campaign_repo)
-    ranking_service = RankingService()
+    
+    # Initialize intent evolution service (optional, requires Graphiti)
+    intent_evolution_service = None
+    if _graphiti_repo is not None and _graphiti_repo.is_initialized:
+        intent_evolution_service = IntentEvolutionService(_graphiti_repo)
+        logger.debug("Intent evolution service enabled")
+    
+    # Initialize ranking service with optional intent evolution
+    ranking_service = RankingService(intent_evolution_service=intent_evolution_service)
     
     # Initialize Graphiti service (optional)
     graphiti_service = None
@@ -133,7 +148,9 @@ def get_retrieval_controller() -> RetrievalController:
         embedding_service=embedding_service,
         search_service=search_service,
         ranking_service=ranking_service,
-        graphiti_service=graphiti_service
+        graphiti_service=graphiti_service,
+        session_state_repo=_session_state_repo,
+        intent_evolution_service=intent_evolution_service
     )
 
 
@@ -152,12 +169,14 @@ def get_dependencies_status() -> dict:
             "vector": _vector_repo is not None,
             "campaign": _campaign_repo is not None,
             "graphiti": _graphiti_repo is not None and _graphiti_repo.is_initialized,
+            "session_state": _session_state_repo is not None,
         },
         "stats": {
             "blocklist_size": _blocklist_repo.get_blocked_terms_count() if _blocklist_repo else 0,
             "taxonomy_categories": _taxonomy_repo.get_category_count() if _taxonomy_repo else 0,
             "vector_index_size": _vector_repo.get_index_size() if _vector_repo else 0,
             "campaign_count": _campaign_repo.get_count() if _campaign_repo else 0,
+            "active_sessions": _session_state_repo.get_active_session_count() if _session_state_repo else 0,
         } if _repositories_initialized else {}
     }
 
@@ -169,7 +188,7 @@ async def shutdown_dependencies():
     Called during FastAPI shutdown event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _graphiti_repo, _repositories_initialized
+    global _graphiti_repo, _session_state_repo, _repositories_initialized
     
     logger.info("Shutting down dependencies...")
     
@@ -181,12 +200,21 @@ async def shutdown_dependencies():
         except Exception as e:
             logger.error(f"Error shutting down Graphiti: {e}")
     
+    # Clear session state
+    if _session_state_repo is not None:
+        try:
+            count = _session_state_repo.clear_all_sessions()
+            logger.info(f"✓ Session state cleared ({count} sessions)")
+        except Exception as e:
+            logger.error(f"Error clearing session state: {e}")
+    
     # Clear repository references
     _blocklist_repo = None
     _taxonomy_repo = None
     _vector_repo = None
     _campaign_repo = None
     _graphiti_repo = None
+    _session_state_repo = None
     _repositories_initialized = False
     
     # Clear LRU cache
