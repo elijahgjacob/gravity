@@ -255,34 +255,23 @@ class TestShutdownDependencies:
         assert deps._graphiti_repo is None
     
     @pytest.mark.asyncio
-    async def test_shutdown_with_graphiti(self, monkeypatch):
+    async def test_shutdown_with_graphiti(self):
         """Test shutdown when Graphiti is initialized."""
-        monkeypatch.setenv("GRAPHITI_ENABLED", "true")
-        monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
-        
-        # Reset global state
         import src.core.dependencies as deps
-        deps._repositories_initialized = False
-        deps._graphiti_repo = None
         
-        # Reload settings
-        from src.core.config import Settings
-        settings = Settings()
+        # Create a mock Graphiti repository
+        mock_repo = MagicMock()
+        mock_repo.is_initialized = True
+        mock_repo.shutdown = AsyncMock()
         
-        with patch('src.core.dependencies.settings', settings), \
-             patch('graphiti_core.Graphiti') as mock_graphiti, \
-             patch('graphiti_core.llm_client.OpenAIClient'):
-            
-            mock_graphiti_instance = MagicMock()
-            mock_graphiti_instance.is_initialized = True
-            mock_graphiti_instance.shutdown = AsyncMock()
-            mock_graphiti.return_value = mock_graphiti_instance
-            
-            await init_dependencies()
+        # Set it as the global Graphiti repo
+        deps._graphiti_repo = mock_repo
+        deps._repositories_initialized = True
         
+        # Shutdown
         await shutdown_dependencies()
         
-        # Verify Graphiti shutdown was called
-        mock_graphiti_instance.shutdown.assert_called_once()
+        # Verify shutdown was called
+        mock_repo.shutdown.assert_called_once()
         assert deps._repositories_initialized is False
         assert deps._graphiti_repo is None
