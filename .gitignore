@@ -38,6 +38,7 @@ data/embeddings.npy
 data/faiss.index
 
 # Environment
+.env
 .env.local
 .env.*.local
 
