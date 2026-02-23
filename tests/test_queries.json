@@ -1,0 +1,126 @@
+[
+  {
+    "name": "Commercial - Running Shoes with Context",
+    "query": "I'm running a marathon next month and need new shoes",
+    "context": {
+      "gender": "male",
+      "age": 24,
+      "location": "San Francisco, CA",
+      "interests": ["fitness", "running"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["running_shoes", "marathon_gear", "athletic_footwear"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Blocked - Sensitive Content",
+    "query": "My mom just passed away",
+    "context": {},
+    "expected_eligibility": "0.0",
+    "expected_categories": [],
+    "expected_campaigns": 0,
+    "short_circuit": true
+  },
+  {
+    "name": "Blocked - Self-Harm",
+    "query": "I want to commit suicide",
+    "context": {},
+    "expected_eligibility": "0.0",
+    "expected_categories": [],
+    "expected_campaigns": 0,
+    "short_circuit": true
+  },
+  {
+    "name": "Informational - Marathon History",
+    "query": "What is the history of the marathon?",
+    "context": {},
+    "expected_eligibility": "0.7-0.85",
+    "expected_categories": ["marathon_gear", "running_shoes"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Commercial - Laptop Purchase",
+    "query": "best laptop for programming under $1500",
+    "context": {
+      "age": 28,
+      "gender": "male",
+      "interests": ["technology", "programming"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["laptops", "electronics", "software"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Commercial - Fitness Equipment",
+    "query": "yoga mat and fitness tracker",
+    "context": {
+      "age": 35,
+      "gender": "female",
+      "location": "New York, NY",
+      "interests": ["yoga", "wellness", "fitness"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["yoga_equipment", "fitness_trackers"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Informational - Product Research",
+    "query": "difference between running shoes and training shoes",
+    "context": {},
+    "expected_eligibility": "0.7-0.85",
+    "expected_categories": ["running_shoes", "athletic_footwear"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Commercial - Multi-Category",
+    "query": "need protein powder, running shoes, and a gym membership",
+    "context": {
+      "age": 26,
+      "gender": "male",
+      "interests": ["fitness", "gym", "bodybuilding"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["sports_nutrition", "running_shoes", "gym_memberships"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Commercial - Travel",
+    "query": "cheap flights to Europe for summer vacation",
+    "context": {
+      "age": 30,
+      "interests": ["travel", "adventure"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["flights", "travel_destinations", "hotels"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Informational - How-To",
+    "query": "how to train for a 5k race",
+    "context": {},
+    "expected_eligibility": "0.7-0.85",
+    "expected_categories": ["running_shoes", "marathon_gear", "online_courses"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Commercial - Electronics",
+    "query": "best smartphone with good camera",
+    "context": {
+      "age": 32,
+      "gender": "female",
+      "interests": ["photography", "technology"]
+    },
+    "expected_eligibility": ">0.9",
+    "expected_categories": ["smartphones", "electronics"],
+    "expected_campaigns": ">0"
+  },
+  {
+    "name": "Sensitive - Health Issue",
+    "query": "I'm depressed and need help",
+    "context": {},
+    "expected_eligibility": "0.3-0.5",
+    "expected_categories": [],
+    "expected_campaigns": ">=0",
+    "note": "Low eligibility but not blocked"
+  }
+]
