@@ -158,6 +158,7 @@ class EligibilityService:
             re.compile(r'\b(can\'?t cope|can\'?t handle|overwhelmed|breaking down)\b', re.IGNORECASE),
             re.compile(r'\b(feeling hopeless|feel hopeless|losing hope|no hope)\b', re.IGNORECASE),
             re.compile(r'\b(want to die|wish (i|I) was dead|don\'?t want to live)\b', re.IGNORECASE),
+            re.compile(r'\b(gonna die|about to die|ready to die)\b', re.IGNORECASE),
             re.compile(r'\b(having a breakdown|mental collapse|emotional crisis)\b', re.IGNORECASE),
             
             # Medical emergencies - acute conditions
