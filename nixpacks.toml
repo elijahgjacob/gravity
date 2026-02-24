@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["python311", "nodejs-20_x", "npm-10_x"]
+
+[phases.install]
+cmds = [
+  "pip install -r requirements.txt",
+  "python scripts/generate_data.py",
+  "python scripts/build_index.py"
+]
+
+[phases.build]
+cmds = [
+  "cd frontend && npm install && npm run build && cd ..",
+  "ls -la frontend/dist || echo 'Frontend dist not found!'"
+]
+
+[start]
+cmd = "uvicorn src.api.main:app --host 0.0.0.0 --port $PORT"
