@@ -33,7 +33,8 @@ class GraphitiService:
         eligibility: float,
         categories: List[str],
         campaigns: List[Dict],
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> None:
         """
         Record a query event to the knowledge graph.
@@ -48,6 +49,7 @@ class GraphitiService:
             categories: Extracted categories
             campaigns: Top campaigns shown (max 10)
             session_id: Optional session identifier
+            user_id: Optional user identifier
         
         Raises:
             Exception: If event recording fails
@@ -61,12 +63,15 @@ class GraphitiService:
                 context=context,
                 eligibility=eligibility,
                 categories=categories,
-                campaigns=campaigns
+                campaigns=campaigns,
+                user_id=user_id
             )
             
             # Generate unique episode name
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
             episode_name = f"query_{timestamp}"
+            if user_id:
+                episode_name = f"{episode_name}_{user_id}"
             if session_id:
                 episode_name = f"{episode_name}_{session_id}"
             
@@ -90,7 +95,8 @@ class GraphitiService:
         context: Optional[Dict],
         eligibility: float,
         categories: List[str],
-        campaigns: List[Dict]
+        campaigns: List[Dict],
+        user_id: Optional[str] = None
     ) -> str:
         """
         Build episode text from query event data.
@@ -104,12 +110,18 @@ class GraphitiService:
             eligibility: Ad eligibility score
             categories: Extracted categories
             campaigns: Top campaigns shown
+            user_id: Optional user identifier
         
         Returns:
             Episode text content
         """
-        # Start with query
-        episode_parts = [f"User Query: \"{query}\""]
+        # Start with user ID if available
+        episode_parts = []
+        if user_id:
+            episode_parts.append(f"User ID: {user_id}")
+        
+        # Add query
+        episode_parts.append(f"User Query: \"{query}\"")
         
         # Add context if available
         if context:
