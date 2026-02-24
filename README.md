@@ -336,35 +336,46 @@ POST /api/retrieve
 | Component | Target | Actual | Strategy |
 |-----------|--------|--------|----------|
 | Input validation | <1ms | <1ms | Pydantic models |
-| Ad eligibility | 5-10ms | ~8ms | Rule-based + blocklist (offloaded to thread pool) |
-| Category extraction | 5-10ms | ~5ms | TF-IDF + keyword matching (offloaded to thread pool) |
-| Query embedding | 5-10ms | **6.62ms** | Local sentence-transformer (offloaded to thread pool) |
-| Vector search | 10-15ms | **1.77ms** | In-memory FAISS (offloaded to thread pool) |
+| Ad eligibility | 5-10ms | ~8ms | Rule-based + blocklist |
+| Category extraction | 5-10ms | ~5ms | TF-IDF + keyword matching |
+| Query embedding | 5-10ms | **6.62ms** | Local sentence-transformer |
+| Vector search | 10-15ms | **1.77ms** | In-memory FAISS |
 | Relevance ranking | 10-20ms | **1.08ms** | NumPy operations |
 | Response serialization | <5ms | <1ms | FastAPI JSON encoder |
 | **Total server-side** | **50-70ms** | **~24ms** | 🎯 Target exceeded! |
 
-### Latency Optimization
+### Latency Optimization for Production
 
-To meet the **< 100ms p95** latency requirement under concurrent load, all CPU-bound operations are offloaded to thread pools using `asyncio.to_thread()`:
+The application achieves **p95 < 33ms** for sequential requests. Under high concurrent load (100+ simultaneous requests), latency can degrade due to Python's Global Interpreter Lock (GIL) serializing CPU-bound operations.
 
-1. **Embedding** (`EmbeddingService.embed_query`): SentenceTransformer model inference (~5-10ms)
-2. **FAISS Search** (`VectorRepository.search`): k-NN search over 10k vectors (~2-5ms)
-3. **Campaign Fetch** (`CampaignRepository.get_by_indices`): Dictionary lookups (~1-2ms)
-4. **Eligibility Scoring** (`EligibilityService.score`): Regex pattern matching (~5-10ms)
-5. **Category Extraction** (`CategoryService.extract`): TF-IDF vectorization (~3-5ms)
+**Production deployment strategies to maintain < 100ms p95 under load:**
 
-**Why this matters:** Without thread offloading, these synchronous operations block the asyncio event loop, preventing concurrent requests from making progress. Under load, this causes latency to spike from ~25ms to 200-400ms. With thread offloading, the event loop remains responsive and can handle 100+ concurrent requests while maintaining p95 < 100ms.
+1. **Horizontal Scaling** (Recommended for Railway/cloud):
+   - Deploy multiple instances (2-4 replicas)
+   - Load balancer distributes requests across instances
+   - Each instance handles ~25-50 concurrent requests efficiently
+   - Railway auto-scaling handles traffic spikes
 
-**Architecture:**
-```
-Event Loop (non-blocking)          Thread Pool (blocking work)
-├─ Input validation                ├─ Eligibility regex
-├─ Orchestration logic              ├─ Category TF-IDF
-├─ Response serialization           ├─ Embedding model.encode()
-└─ Async coordination               ├─ FAISS index.search()
-                                    └─ Campaign dictionary lookups
-```
+2. **Multi-Worker Configuration** (For single-instance deployments):
+   ```bash
+   gunicorn src.api.main:app \
+     --workers 4 \
+     --worker-class uvicorn.workers.UvicornWorker \
+     --bind 0.0.0.0:$PORT
+   ```
+   - Each worker is a separate process (bypasses GIL)
+   - 4 workers can handle 100+ concurrent requests
+   - Note: Not recommended for Railway (use horizontal scaling instead)
+
+3. **Caching Layer** (Future enhancement):
+   - Redis cache for frequent queries
+   - Reduces load on embedding/search pipeline
+   - Can achieve < 10ms for cached results
+
+**Performance under load:**
+- Sequential: p95 = 32ms ✅
+- 10 concurrent: p95 = ~50-80ms ✅ (with proper deployment)
+- 100 concurrent: Requires multiple instances/workers
 
 ### Test Coverage
 
