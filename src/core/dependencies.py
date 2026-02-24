@@ -121,7 +121,7 @@ def get_dependencies_status() -> dict:
             "campaign": _campaign_repo is not None,
         },
         "stats": {
-            "blocklist_size": _blocklist_repo.get_blocklist_size() if _blocklist_repo else 0,
+            "blocklist_size": _blocklist_repo.get_blocked_terms_count() if _blocklist_repo else 0,
             "taxonomy_categories": _taxonomy_repo.get_category_count() if _taxonomy_repo else 0,
             "vector_index_size": _vector_repo.get_index_size() if _vector_repo else 0,
             "campaign_count": _campaign_repo.get_count() if _campaign_repo else 0,
