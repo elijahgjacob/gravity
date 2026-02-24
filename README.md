@@ -532,11 +532,21 @@ MAX_CAMPAIGNS_RETURNED=1000
 
 ### Deployment Platforms
 
-**Railway / Render / Fly.io:**
+**Railway (Recommended):**
 1. Set Python version to 3.11+
 2. Install command: `pip install -r requirements.txt`
 3. Start command: `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
 4. Ensure data files are included in deployment
+5. **For production load**: Configure 2-4 replicas in Railway dashboard (Settings → Replicas)
+   - This provides horizontal scaling to handle concurrent requests
+   - Each replica is a separate process, bypassing Python's GIL
+   - Recommended: Start with 2 replicas, scale up based on traffic
+
+**Render / Fly.io:**
+1. Set Python version to 3.11+
+2. Install command: `pip install -r requirements.txt`
+3. Start command: `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
+4. Configure multiple instances for production load
 
 **Docker:**
 ```dockerfile
