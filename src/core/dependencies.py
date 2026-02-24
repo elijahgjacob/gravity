@@ -144,6 +144,7 @@ async def init_dependencies():
                     _profile_summary_service = ProfileSummaryService(
                         api_key=settings.OPENROUTER_API_KEY,
                         model=settings.PROFILE_SUMMARY_LLM_MODEL,
+                        verify_ssl=settings.OPENROUTER_VERIFY_SSL,
                     )
                     logger.info("✓ Profile summary service initialized (OpenRouter)")
                 else:

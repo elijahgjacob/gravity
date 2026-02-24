@@ -18,16 +18,18 @@ class ProfileSummaryService:
     using an LLM via OpenRouter.
     """
 
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, verify_ssl: bool = True):
         """
         Initialize the profile summary service.
 
         Args:
             api_key: OpenRouter API key
             model: Model identifier (e.g. openai/gpt-3.5-turbo, anthropic/claude-3.5-sonnet)
+            verify_ssl: If False, disable SSL verification (use only for local cert issues).
         """
         self.api_key = api_key
         self.model = model
+        self.verify_ssl = verify_ssl
 
     def _build_prompt(self, profile: UserProfile) -> str:
         """Build the LLM prompt from profile data."""
@@ -115,7 +117,7 @@ Respond with a single JSON object only, no markdown or extra text:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=60.0, verify=self.verify_ssl) as client:
                 response = await client.post(OPENROUTER_URL, json=payload, headers=headers)
                 response.raise_for_status()
                 data = response.json()

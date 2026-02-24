@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     GRAPHITI_NEO4J_USER: str = "neo4j"
     GRAPHITI_NEO4J_PASSWORD: str = "password"
     OPENROUTER_API_KEY: str = ""
+    OPENROUTER_VERIFY_SSL: bool = True  # Set False only to work around local cert issues (e.g. macOS)
     GRAPHITI_LLM_MODEL: str = "anthropic/claude-3.5-sonnet"
     GRAPHITI_NAMESPACE: str = "ad_retrieval"
     
