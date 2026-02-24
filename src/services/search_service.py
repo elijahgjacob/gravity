@@ -5,7 +5,6 @@ This service performs vector similarity search and retrieves
 campaign data using FAISS and the campaign repository.
 """
 
-import asyncio
 from typing import List
 import numpy as np
 from src.repositories.vector_repository import VectorRepository
@@ -57,19 +56,12 @@ class SearchService:
         Returns:
             List of campaign dictionaries with added 'similarity_score' field
         """
-        # Step 1: Vector search using FAISS (offload to thread pool)
+        # Step 1: Vector search using FAISS
         # Returns indices and L2 distances
-        indices, distances = await asyncio.to_thread(
-            self.vector_repo.search,
-            query_embedding,
-            k
-        )
+        indices, distances = self.vector_repo.search(query_embedding, k)
         
-        # Step 2: Retrieve campaign data for matched indices (offload to thread pool)
-        campaigns = await asyncio.to_thread(
-            self.campaign_repo.get_by_indices,
-            indices
-        )
+        # Step 2: Retrieve campaign data for matched indices
+        campaigns = self.campaign_repo.get_by_indices(indices)
         
         # Step 3: Attach similarity scores
         # Convert L2 distance to similarity score (0-1 range)
