@@ -20,11 +20,12 @@ from src.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Singleton repositories (loaded once at startup)
+# Singleton repositories and services (loaded once at startup)
 _blocklist_repo: Optional[BlocklistRepository] = None
 _taxonomy_repo: Optional[TaxonomyRepository] = None
 _vector_repo: Optional[VectorRepository] = None
 _campaign_repo: Optional[CampaignRepository] = None
+_embedding_service: Optional[EmbeddingService] = None
 _graphiti_repo: Optional[GraphitiRepository] = None
 _repositories_initialized = False
 
@@ -38,12 +39,13 @@ async def init_dependencies():
     - Taxonomy repository
     - Vector repository (FAISS index)
     - Campaign repository
+    - Embedding service (loads model at startup to avoid first-request penalty)
     - Graphiti repository (optional)
     
     Called once during FastAPI startup event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _graphiti_repo, _repositories_initialized
+    global _embedding_service, _graphiti_repo, _repositories_initialized
     
     if _repositories_initialized:
         logger.warning("Dependencies already initialized")
@@ -64,6 +66,9 @@ async def init_dependencies():
         
         _campaign_repo = CampaignRepository(settings.CAMPAIGNS_PATH)
         logger.info("✓ Campaign repository initialized")
+        
+        _embedding_service = EmbeddingService(settings.EMBEDDING_MODEL)
+        logger.info("✓ Embedding service initialized")
         
         # Initialize Graphiti (optional - graceful degradation)
         if settings.GRAPHITI_ENABLED:
@@ -113,10 +118,9 @@ def get_retrieval_controller() -> RetrievalController:
             "Dependencies not initialized. Call init_dependencies() first."
         )
     
-    # Initialize services
+    # Initialize services (reuse singleton embedding service)
     eligibility_service = EligibilityService(_blocklist_repo)
     category_service = CategoryService(_taxonomy_repo)
-    embedding_service = EmbeddingService(settings.EMBEDDING_MODEL)
     search_service = SearchService(_vector_repo, _campaign_repo)
     ranking_service = RankingService()
     
@@ -130,7 +134,7 @@ def get_retrieval_controller() -> RetrievalController:
     return RetrievalController(
         eligibility_service=eligibility_service,
         category_service=category_service,
-        embedding_service=embedding_service,
+        embedding_service=_embedding_service,
         search_service=search_service,
         ranking_service=ranking_service,
         graphiti_service=graphiti_service
@@ -169,7 +173,7 @@ async def shutdown_dependencies():
     Called during FastAPI shutdown event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _graphiti_repo, _repositories_initialized
+    global _embedding_service, _graphiti_repo, _repositories_initialized
     
     logger.info("Shutting down dependencies...")
     
@@ -186,6 +190,7 @@ async def shutdown_dependencies():
     _taxonomy_repo = None
     _vector_repo = None
     _campaign_repo = None
+    _embedding_service = None
     _graphiti_repo = None
     _repositories_initialized = False
     
