@@ -1,0 +1,213 @@
+{
+  "rules": [
+    {
+      "rule_id": "marathon_planning",
+      "name": "Marathon Event Planning",
+      "description": "Detects users planning to attend a marathon event",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["marathon", "running", "shoes", "training", "race", "5k", "10k", "half marathon"],
+          "category_match": ["running_shoes", "athletic_footwear", "sportswear"],
+          "requires_location": false,
+          "min_keyword_matches": 2
+        },
+        {
+          "step": 2,
+          "keywords": ["weather", "forecast", "temperature", "climate", "conditions"],
+          "requires_location": true,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 3,
+          "keywords": ["hotel", "accommodation", "lodging", "stay", "booking", "airbnb"],
+          "requires_location": true,
+          "location_must_match_step": 2,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["airfare", "travel_packages", "event_tickets", "car_rental", "travel_insurance"],
+      "confidence_threshold": 0.75,
+      "time_window_hours": 168,
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "rule_id": "vacation_planning",
+      "name": "Vacation Planning",
+      "description": "Detects users planning a vacation or leisure trip",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["vacation", "holiday", "trip", "travel", "getaway", "weekend"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["flight", "airfare", "tickets", "airline", "plane"],
+          "requires_location": true,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 3,
+          "keywords": ["hotel", "resort", "accommodation", "stay", "booking"],
+          "requires_location": true,
+          "location_must_match_step": 2,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["car_rental", "travel_insurance", "tours", "activities", "restaurants", "luggage"],
+      "confidence_threshold": 0.8,
+      "time_window_hours": 336,
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "rule_id": "shopping_research",
+      "name": "Product Research & Shopping",
+      "description": "Detects users researching products before purchase",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["best", "top", "review", "comparison", "vs", "versus"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["price", "cost", "cheap", "deal", "discount", "sale", "coupon"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["coupons", "price_comparison", "cashback", "financing", "warranty"],
+      "confidence_threshold": 0.7,
+      "time_window_hours": 24,
+      "enabled": true,
+      "priority": 3
+    },
+    {
+      "rule_id": "home_improvement",
+      "name": "Home Improvement Project",
+      "description": "Detects users planning home improvement or renovation",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["kitchen", "bathroom", "renovation", "remodel", "upgrade", "repair"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["contractor", "professional", "service", "installation", "installer"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["home_services", "tools", "materials", "financing", "insurance"],
+      "confidence_threshold": 0.75,
+      "time_window_hours": 168,
+      "enabled": true,
+      "priority": 4
+    },
+    {
+      "rule_id": "fitness_journey",
+      "name": "Fitness Journey Start",
+      "description": "Detects users starting a fitness or weight loss journey",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["lose weight", "fitness", "workout", "gym", "exercise", "get fit"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["diet", "nutrition", "meal plan", "protein", "supplements", "calories"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["fitness_equipment", "gym_membership", "personal_training", "meal_delivery", "fitness_apps"],
+      "confidence_threshold": 0.7,
+      "time_window_hours": 72,
+      "enabled": true,
+      "priority": 5
+    },
+    {
+      "rule_id": "wedding_planning",
+      "name": "Wedding Planning",
+      "description": "Detects users planning a wedding",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["wedding", "engagement", "bride", "groom", "marry"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["venue", "reception", "catering", "photographer", "dress"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["wedding_services", "jewelry", "flowers", "invitations", "honeymoon_travel"],
+      "confidence_threshold": 0.8,
+      "time_window_hours": 720,
+      "enabled": true,
+      "priority": 6
+    },
+    {
+      "rule_id": "car_shopping",
+      "name": "Car Shopping",
+      "description": "Detects users shopping for a vehicle",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["car", "vehicle", "suv", "sedan", "truck", "auto"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["price", "financing", "loan", "lease", "payment", "dealer"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["auto_insurance", "extended_warranty", "accessories", "maintenance"],
+      "confidence_threshold": 0.75,
+      "time_window_hours": 168,
+      "enabled": true,
+      "priority": 7
+    },
+    {
+      "rule_id": "job_search",
+      "name": "Job Search",
+      "description": "Detects users actively job hunting",
+      "pattern": [
+        {
+          "step": 1,
+          "keywords": ["job", "career", "hiring", "employment", "position"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        },
+        {
+          "step": 2,
+          "keywords": ["resume", "cv", "interview", "application", "linkedin"],
+          "requires_location": false,
+          "min_keyword_matches": 1
+        }
+      ],
+      "inferred_categories": ["professional_services", "courses", "certifications", "career_coaching", "relocation_services"],
+      "confidence_threshold": 0.75,
+      "time_window_hours": 168,
+      "enabled": true,
+      "priority": 8
+    }
+  ],
+  "version": "1.0.0",
+  "last_updated": "2026-02-24T10:00:00Z"
+}
