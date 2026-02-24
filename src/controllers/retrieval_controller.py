@@ -303,7 +303,7 @@ class RetrievalController:
                 eligibility=eligibility,
                 categories=categories,
                 campaigns=campaign_dicts,
-                session_id=None  # TODO: Add session tracking
+                session_id=request.session_id
             )
             
             logger.debug(f"Query event recorded to Graphiti: '{request.query[:50]}...'")
