@@ -4,15 +4,20 @@
 
 This document summarizes the performance characteristics of the Ad Retrieval API under various load conditions.
 
-⚠️ **Note**: These results are from **local testing** (MacBook). Railway deployment testing is currently blocked by local DNS configuration (OpenDNS blocking Railway domains). See `DEPLOYMENT_TEST.md` for Railway testing instructions from alternative networks.
+## Test Environments
 
-## Test Environment
-
-- **Hardware**: MacBook (local testing)
+### Local Testing
+- **Hardware**: MacBook
 - **Python**: 3.12
 - **Server**: Uvicorn (single worker)
 - **Dataset**: 10,000 campaigns, 384-dimensional embeddings
 - **Network**: Local (localhost:8000)
+
+### Railway Production Testing
+- **Platform**: Railway (https://gravity-api-production.up.railway.app)
+- **Instance**: Single replica
+- **Network**: Public internet (tested via mobile hotspot)
+- **Dataset**: Same (10,000 campaigns, 384-dimensional embeddings)
 
 ## Sequential Performance
 
@@ -31,6 +36,8 @@ This document summarizes the performance characteristics of the Ad Retrieval API
 
 ## Concurrent Performance (Single Instance)
 
+### Local Testing (localhost)
+
 | Concurrency | Mean | P95 | Status |
 |-------------|------|-----|--------|
 | 1 concurrent | 64.79ms | 64.79ms | ✅ |
@@ -41,7 +48,20 @@ This document summarizes the performance characteristics of the Ad Retrieval API
 | 10 concurrent | 152.88ms | 198.96ms | ❌ |
 | 20 concurrent | 166.50ms | 257.29ms | ❌ |
 
-**Key Finding**: A single instance can handle up to **4 concurrent requests** while maintaining p95 < 100ms.
+### Railway Production Testing (Single Replica)
+
+| Concurrency | Total Requests | Mean | P50 | P95 | Status |
+|-------------|----------------|------|-----|-----|--------|
+| 10 concurrent | 100 | 184.42ms | 175.62ms | **321.69ms** | ❌ |
+| 25 concurrent | 250 | 381.83ms | 388.34ms | **739.10ms** | ❌ |
+| 50 concurrent | 500 | 774.29ms | 800.14ms | **1328.10ms** | ❌ |
+| 100 concurrent | 1000 | 812.48ms | 892.44ms | **1286.14ms** | ❌ |
+
+**Key Findings**: 
+- Railway shows slightly higher latency than local testing (network overhead)
+- Single instance cannot meet <100ms P95 target under any concurrent load
+- Minimum latency: 27ms (confirms fast sequential performance)
+- **Horizontal scaling required for production concurrent load**
 
 ## Root Cause Analysis
 
@@ -108,10 +128,22 @@ To configure multiple replicas on Railway:
 
 ## Recommendations
 
-1. **Development/Testing**: Single instance is sufficient
-2. **Production (light traffic)**: Start with 2 replicas for redundancy
-3. **Production (expected load)**: Configure 2-4 replicas based on anticipated concurrent users
-4. **Auto-scaling**: Enable Railway auto-scaling to handle traffic spikes
+Based on testing both local and Railway deployments:
+
+1. **Development/Testing**: Single instance is sufficient (sequential requests perform well)
+2. **Production (any concurrent load)**: **Minimum 2 replicas required** to meet <100ms P95 target
+3. **Production (10-25 concurrent)**: 2-3 replicas recommended
+4. **Production (50+ concurrent)**: 4+ replicas with auto-scaling enabled
+5. **Cost optimization**: Start with 2 replicas, monitor Railway metrics, scale up as needed
+
+### Expected Performance with Horizontal Scaling
+
+| Replicas | Max Concurrent (P95 < 100ms) | Throughput |
+|----------|------------------------------|------------|
+| 1 replica | ~4 requests | ~28 req/sec |
+| 2 replicas | ~8-10 requests | ~56 req/sec |
+| 3 replicas | ~12-15 requests | ~84 req/sec |
+| 4 replicas | ~16-20 requests | ~112 req/sec |
 
 ## Test Scripts
 
