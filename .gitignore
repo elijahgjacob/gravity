@@ -32,10 +32,10 @@ ENV/
 *.swo
 *~
 
-# Data files (generated)
-data/campaigns.jsonl
-data/embeddings.npy
-data/faiss.index
+# Data files (generated) - commented out for Railway deployment
+# data/campaigns.jsonl
+# data/embeddings.npy
+# data/faiss.index
 
 # Environment
 .env
