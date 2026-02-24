@@ -1,11 +1,14 @@
 """FastAPI application initialization."""
 
+import os
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.api.routes import health, retrieval
 from src.core.dependencies import init_dependencies, shutdown_dependencies
@@ -120,12 +123,19 @@ app.include_router(retrieval.router, prefix="/api", tags=["retrieval"])
 app.include_router(health.router, prefix="/api", tags=["health"])
 
 
-@app.get("/", include_in_schema=False)
-async def root():
-    """Root endpoint redirect to docs."""
-    return {
-        "message": "Ad Retrieval API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "health": "/api/health",
-    }
+# Mount static files for demo UI (if frontend/dist exists)
+frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="static")
+    logger.info(f"Serving demo UI from {frontend_dist}")
+else:
+    @app.get("/", include_in_schema=False)
+    async def root():
+        """Root endpoint redirect to docs."""
+        return {
+            "message": "Ad Retrieval API",
+            "version": "1.0.0",
+            "docs": "/docs",
+            "health": "/api/health",
+            "note": "Demo UI not built. Run: cd frontend && npm install && npm run build"
+        }
