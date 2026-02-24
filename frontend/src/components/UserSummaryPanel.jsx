@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Select } from './ui/select'
+import { Badge } from './ui/badge'
+import { User, RefreshCw, Loader2, TrendingUp, Tag } from 'lucide-react'
 
 /** Sanitize for use in user_id: keep alphanumeric, dots, hyphens; collapse underscores; limit length */
 function sanitizeIdPart(s) {
@@ -130,190 +137,261 @@ export default function UserSummaryPanel({ onSelectUser }) {
   }
 
   return (
-    <section className="user-summary-section">
-      <h2>User Summary</h2>
+    <Card className="shadow-md bg-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-2xl">
+          <User className="w-6 h-6" />
+          User Summary
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-5">
+        <div className="p-4 bg-muted rounded-lg border border-border space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-1">Identify user (IP + device)</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Set IP and device ID to label this user. Use this user, then run a search to create or update their profile.
+            </p>
+          </div>
 
-      <div className="user-identity-block">
-        <h3 className="user-identity-title">Identify user (IP + device)</h3>
-        <p className="user-identity-hint">Set IP and device ID to label this user. Use this user, then run a search to create or update their profile.</p>
-        <div className="user-identity-fields">
-          <div className="user-identity-field">
-            <label htmlFor="ip-address">IP address</label>
-            <input
-              id="ip-address"
-              type="text"
-              value={ipAddress}
-              onChange={(e) => setIpAddress(e.target.value)}
-              placeholder="e.g. 192.168.1.1"
-              className="user-id-input"
-              aria-label="IP address"
-            />
+          <div className="flex flex-wrap gap-3 items-end">
+            <div className="flex-1 min-w-[140px] space-y-1.5">
+              <Label htmlFor="ip-address" className="text-xs">IP address</Label>
+              <Input
+                id="ip-address"
+                type="text"
+                value={ipAddress}
+                onChange={(e) => setIpAddress(e.target.value)}
+                placeholder="e.g. 192.168.1.1"
+                className="font-mono text-sm h-9"
+                aria-label="IP address"
+              />
+            </div>
+            <div className="flex-1 min-w-[140px] space-y-1.5">
+              <Label htmlFor="device-id" className="text-xs">Device ID</Label>
+              <Input
+                id="device-id"
+                type="text"
+                value={deviceId}
+                onChange={(e) => setDeviceId(e.target.value)}
+                placeholder="e.g. device_abc123"
+                className="font-mono text-sm h-9"
+                aria-label="Device ID"
+              />
+            </div>
+            <Button
+              type="button"
+              onClick={handleUseIdentityUser}
+              disabled={(!ipAddress.trim() && !deviceId.trim()) || summaryLoading}
+              size="sm"
+              className="h-9"
+            >
+              Use this user
+            </Button>
           </div>
-          <div className="user-identity-field">
-            <label htmlFor="device-id">Device ID</label>
-            <input
-              id="device-id"
-              type="text"
-              value={deviceId}
-              onChange={(e) => setDeviceId(e.target.value)}
-              placeholder="e.g. device_abc123"
-              className="user-id-input"
-              aria-label="Device ID"
-            />
-          </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleUseIdentityUser}
-            disabled={(!ipAddress.trim() && !deviceId.trim()) || summaryLoading}
-          >
-            Use this user
-          </button>
+
+          {deriveUserId(ipAddress, deviceId) && (
+            <div className="pt-2">
+              <p className="text-xs text-muted-foreground">
+                Derived ID: <code className="bg-muted-foreground/20 px-2 py-0.5 rounded text-foreground font-mono">
+                  {deriveUserId(ipAddress, deviceId)}
+                </code>
+              </p>
+            </div>
+          )}
         </div>
-        {deriveUserId(ipAddress, deviceId) && (
-          <p className="user-derived-id">Derived ID: <code>{deriveUserId(ipAddress, deviceId)}</code></p>
-        )}
-      </div>
 
-      <div className="user-id-demo-row">
-        <label htmlFor="user-id-input">User ID (demo)</label>
-        <input
-          id="user-id-input"
-          type="text"
-          value={userIdInput}
-          onChange={(e) => setUserIdInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLoadUser()}
-          placeholder="e.g. 192.233.24 or user_123"
-          className="user-id-input"
-          aria-label="User ID for demo"
-        />
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleLoadUser}
-          disabled={!userIdInput.trim() || summaryLoading}
-        >
-          Load
-        </button>
-      </div>
-
-      <div className="user-select-row">
-        <label htmlFor="user-select">From cache</label>
-        <select
-          id="user-select"
-          value={userIds.includes(selectedUserId) ? selectedUserId : ''}
-          onChange={handleCacheSelect}
-          disabled={usersLoading}
-          className="user-summary-select"
-          aria-label="Select cached user"
-        >
-          <option value="">-- Pick a cached user --</option>
-          {userIds.length === 0 && !usersLoading && <option value="" disabled>No users in cache</option>}
-          {userIds.map((id) => (
-            <option key={id} value={id}>{id}</option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={handleRefreshAnalysis}
-          disabled={!selectedUserId || summaryLoading || analyzing}
-        >
-          {analyzing ? 'Analyzing...' : 'Refresh analysis'}
-        </button>
-      </div>
-
-      {usersError && (
-        <div className="user-summary-error">{usersError}</div>
-      )}
-
-      {!selectedUserId && !usersError && (
-        <p className="user-summary-placeholder">Select a user to view their profile and LLM summary.</p>
-      )}
-
-      {selectedUserId && summaryError && (
-        <div className="user-summary-error">{summaryError}</div>
-      )}
-
-      {selectedUserId && summaryLoading && !profile && (
-        <p className="user-summary-placeholder">Loading profile and summary...</p>
-      )}
-
-      {selectedUserId && profile && (
-        <div className="user-summary-panel">
-          <div className="summary-meta-row">
-            <span className="user-id-badge">{profile.user_id}</span>
-            <span>Queries: {profile.query_count ?? 0}</span>
-            <span>Updated: {profile.last_updated ? new Date(profile.last_updated).toLocaleString() : '—'}</span>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[180px] space-y-1.5">
+            <Label htmlFor="user-id-input" className="text-sm font-semibold">User ID (demo)</Label>
+            <Input
+              id="user-id-input"
+              type="text"
+              value={userIdInput}
+              onChange={(e) => setUserIdInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLoadUser()}
+              placeholder="e.g. 192.233.24 or user_123"
+              className="font-mono text-sm"
+              aria-label="User ID for demo"
+            />
           </div>
+          <Button
+            type="button"
+            onClick={handleLoadUser}
+            disabled={!userIdInput.trim() || summaryLoading}
+          >
+            Load
+          </Button>
+        </div>
 
-          {profile.query_history?.length > 0 && (
-            <div className="summary-block">
-              <h3>Recent queries</h3>
-              <ol className="summary-query-list">
-                {profile.query_history.slice(-15).reverse().map((item, idx) => (
-                  <li key={idx}>{item.query}</li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {profile.inferred_intents?.length > 0 && (
-            <div className="summary-block">
-              <h3>Inferred intents</h3>
-              <ul className="summary-intents-list">
-                {profile.inferred_intents.map((intent, idx) => (
-                  <li key={idx}>
-                    <strong>{intent.intent_type}</strong>
-                    {' '}({(intent.confidence * 100).toFixed(0)}%)
-                    {intent.metadata && Object.keys(intent.metadata).length > 0 && (
-                      <> · {JSON.stringify(intent.metadata)}</>
-                    )}
-                    {intent.inferred_categories?.length > 0 && (
-                      <> · Categories: {intent.inferred_categories.join(', ')}</>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {(profile.inferred_categories?.length > 0 || profile.aggregated_interests?.length > 0) && (
-            <div className="summary-block">
-              <h3>Categories &amp; interests</h3>
-              <div className="summary-tags">
-                {(profile.inferred_categories || []).map((cat) => (
-                  <span key={cat} className="category-tag">{cat}</span>
-                ))}
-                {(profile.aggregated_interests || []).map((interest) => (
-                  <span key={interest} className="category-tag summary-interest">{interest}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="summary-block">
-            <h3>LLM Summary</h3>
-            {summary ? (
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px] space-y-1.5">
+            <Label htmlFor="user-select" className="text-sm font-semibold">From cache</Label>
+            <Select
+              id="user-select"
+              value={userIds.includes(selectedUserId) ? selectedUserId : ''}
+              onChange={handleCacheSelect}
+              disabled={usersLoading}
+              className="font-mono text-sm"
+              aria-label="Select cached user"
+            >
+              <option value="">-- Pick a cached user --</option>
+              {userIds.length === 0 && !usersLoading && <option value="" disabled>No users in cache</option>}
+              {userIds.map((id) => (
+                <option key={id} value={id}>{id}</option>
+              ))}
+            </Select>
+          </div>
+          <Button
+            type="button"
+            onClick={handleRefreshAnalysis}
+            disabled={!selectedUserId || summaryLoading || analyzing}
+            variant="outline"
+          >
+            {analyzing ? (
               <>
-                <div className="summary-narrative">{summary.narrative_summary}</div>
-                {summary.suggested_campaigns?.length > 0 && (
-                  <>
-                    <h4 className="summary-campaigns-title">Suggested ad campaigns</h4>
-                    <ul className="suggested-campaigns-list">
-                      {summary.suggested_campaigns.map((campaign, idx) => (
-                        <li key={idx}>{campaign}</li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Analyzing...
               </>
             ) : (
-              <p className="user-summary-placeholder">Summary not available (LLM may be disabled or key not set).</p>
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Refresh analysis
+              </>
             )}
-          </div>
+          </Button>
         </div>
-      )}
-    </section>
+
+        {usersError && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+            {usersError}
+          </div>
+        )}
+
+        {!selectedUserId && !usersError && (
+          <p className="text-sm text-muted-foreground italic py-2">
+            Select a user to view their profile and LLM summary.
+          </p>
+        )}
+
+        {selectedUserId && summaryError && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+            {summaryError}
+          </div>
+        )}
+
+        {selectedUserId && summaryLoading && !profile && (
+          <div className="flex items-center gap-2 py-4 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <p className="text-sm">Loading profile and summary...</p>
+          </div>
+        )}
+
+        {selectedUserId && profile && (
+          <div className="space-y-5 pt-4 border-t border-border">
+            <div className="flex flex-wrap gap-2 items-center text-sm">
+              <Badge className="font-mono">
+                {profile.user_id}
+              </Badge>
+              <Badge variant="secondary" className="bg-blue-600/20 text-blue-400 border-blue-500/30">
+                {profile.query_count ?? 0} queries
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Updated: {profile.last_updated ? new Date(profile.last_updated).toLocaleString() : '—'}
+              </span>
+            </div>
+
+            {profile.query_history?.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Recent queries
+                </h3>
+                <div className="p-3 bg-muted rounded-lg border border-border max-h-48 overflow-y-auto">
+                  <ol className="space-y-1 text-sm list-decimal list-inside">
+                    {profile.query_history.slice(-15).reverse().map((item, idx) => (
+                      <li key={idx} className="text-foreground">{item.query}</li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {profile.inferred_intents?.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">Inferred intents</h3>
+                <ul className="space-y-2">
+                  {profile.inferred_intents.map((intent, idx) => (
+                    <li key={idx} className="text-sm p-2 bg-muted rounded border border-border">
+                      <span className="font-semibold text-foreground">{intent.intent_type}</span>
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        {(intent.confidence * 100).toFixed(0)}%
+                      </Badge>
+                      {intent.metadata && Object.keys(intent.metadata).length > 0 && (
+                        <span className="text-muted-foreground"> · {JSON.stringify(intent.metadata)}</span>
+                      )}
+                      {intent.inferred_categories?.length > 0 && (
+                        <span className="text-muted-foreground"> · Categories: {intent.inferred_categories.join(', ')}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(profile.inferred_categories?.length > 0 || profile.aggregated_interests?.length > 0) && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Categories &amp; interests
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {(profile.inferred_categories || []).map((cat) => (
+                    <Badge key={cat} variant="secondary" className="bg-purple-600/20 text-purple-400 border-purple-500/30">
+                      {cat}
+                    </Badge>
+                  ))}
+                  {(profile.aggregated_interests || []).map((interest) => (
+                    <Badge key={interest} variant="secondary" className="bg-indigo-600/20 text-indigo-400 border-indigo-500/30">
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">LLM Summary</h3>
+              {summary ? (
+                <div className="space-y-3">
+                  <div className="p-4 bg-gradient-to-br from-blue-600/10 to-indigo-600/10 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-sm text-foreground leading-relaxed">{summary.narrative_summary}</p>
+                  </div>
+                  {summary.suggested_campaigns?.length > 0 && (
+                    <>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Suggested ad campaigns
+                      </h4>
+                      <ul className="space-y-1.5">
+                        {summary.suggested_campaigns.map((campaign, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                            <span className="text-blue-500 font-bold mt-0.5">→</span>
+                            <span>{campaign}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic py-2">
+                  Summary not available (LLM may be disabled or key not set).
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

@@ -1,4 +1,9 @@
 import React, { useState } from 'react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Select } from './ui/select'
+import { Search, ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 
 export default function QueryInput({ onSubmit, loading }) {
   const [query, setQuery] = useState('')
@@ -36,52 +41,63 @@ export default function QueryInput({ onSubmit, loading }) {
   ]
 
   return (
-    <div className="query-input-container">
-      <form onSubmit={handleSubmit}>
-        <div className="query-section">
-          <label htmlFor="query">Search Query</label>
-          <input
-            id="query"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter a search query..."
-            disabled={loading}
-            className="query-input"
-          />
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-3">
+          <Label htmlFor="query" className="text-base font-semibold">Search Query</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              id="query"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter a search query..."
+              disabled={loading}
+              className="pl-10 h-12 text-base focus:ring-primary"
+            />
+          </div>
           
-          <div className="example-queries">
-            <span>Examples:</span>
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-muted-foreground font-medium flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" />
+              Examples:
+            </span>
             {exampleQueries.map((example, idx) => (
-              <button
+              <Button
                 key={idx}
                 type="button"
                 onClick={() => setQuery(example)}
                 disabled={loading}
-                className="example-btn"
+                variant="outline"
+                size="sm"
+                className="text-xs hover:bg-accent transition-all"
               >
                 {example}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
-        <div className="context-section">
-          <button
+        <div className="space-y-3">
+          <Button
             type="button"
             onClick={() => setShowContext(!showContext)}
-            className="toggle-context-btn"
+            variant="ghost"
+            size="sm"
             disabled={loading}
+            className="flex items-center gap-2 hover:bg-accent"
           >
-            {showContext ? '− Hide' : '+ Add'} Context (Optional)
-          </button>
+            {showContext ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {showContext ? 'Hide' : 'Add'} Context (Optional)
+          </Button>
 
           {showContext && (
-            <div className="context-fields">
-              <div className="context-row">
-                <div className="field">
-                  <label htmlFor="age">Age</label>
-                  <input
+            <div className="space-y-4 p-4 bg-muted rounded-lg border border-border animate-slide-down">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Input
                     id="age"
                     type="number"
                     value={context.age}
@@ -90,9 +106,9 @@ export default function QueryInput({ onSubmit, loading }) {
                     disabled={loading}
                   />
                 </div>
-                <div className="field">
-                  <label htmlFor="gender">Gender</label>
-                  <select
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select
                     id="gender"
                     value={context.gender}
                     onChange={(e) => setContext({...context, gender: e.target.value})}
@@ -102,13 +118,13 @@ export default function QueryInput({ onSubmit, loading }) {
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
-              <div className="context-row">
-                <div className="field">
-                  <label htmlFor="location">Location</label>
-                  <input
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
                     id="location"
                     type="text"
                     value={context.location}
@@ -117,9 +133,9 @@ export default function QueryInput({ onSubmit, loading }) {
                     disabled={loading}
                   />
                 </div>
-                <div className="field">
-                  <label htmlFor="interests">Interests</label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="interests">Interests</Label>
+                  <Input
                     id="interests"
                     type="text"
                     value={context.interests}
@@ -133,9 +149,23 @@ export default function QueryInput({ onSubmit, loading }) {
           )}
         </div>
 
-        <button type="submit" disabled={loading || !query.trim()} className="submit-btn">
-          {loading ? 'Searching...' : 'Search Campaigns'}
-        </button>
+        <Button 
+          type="submit" 
+          disabled={loading || !query.trim()} 
+          className="w-full h-12 text-base font-semibold transition-all shadow-md hover:shadow-lg"
+        >
+          {loading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+              Searching...
+            </>
+          ) : (
+            <>
+              <Search className="w-5 h-5" />
+              Search Campaigns
+            </>
+          )}
+        </Button>
       </form>
     </div>
   )
