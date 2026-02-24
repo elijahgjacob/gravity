@@ -474,6 +474,65 @@ python scripts/benchmark.py --runs 100
 python test_api.py
 ```
 
+## CI/CD Pipeline
+
+The project uses **GitHub Actions** for automated testing, linting, and deployment.
+
+### Pipeline Stages
+
+1. **Lint Code** (Required)
+   - Ruff: Code quality and style checks
+   - Black: Code formatting verification
+   - All code must pass linting before merge
+
+2. **Type Check** (Optional)
+   - MyPy: Static type checking
+   - Runs in parallel, doesn't block deployment
+
+3. **Run Tests** (Required)
+   - Unit tests: `tests/unit/`
+   - Integration tests: `tests/integration/`
+   - Phase tests: `tests/phase1/`, `tests/phase2/`
+   - Generates test data automatically
+
+4. **Deploy to Railway** (Automatic on main)
+   - Triggers on push to `main` branch
+   - Deploys to production environment
+   - Requires `RAILWAY_TOKEN` secret
+
+### Local Development
+
+**Install pre-commit hooks:**
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+**Run linters locally:**
+```bash
+ruff check src/ tests/ scripts/
+black src/ tests/ scripts/
+mypy src/
+```
+
+**Run tests locally:**
+```bash
+pytest tests/ -v
+```
+
+### GitHub Secrets Required
+
+- `RAILWAY_TOKEN`: Railway API token for automated deployment
+  - Get from: https://railway.app/account/tokens
+  - Add to: Repository Settings → Secrets and variables → Actions
+
+### Continuous Deployment
+
+Every push to `main` that passes CI/CD automatically deploys to Railway:
+- URL: https://gravity-api-production.up.railway.app
+- Health check: `/api/health`
+- Deployment logs: `railway logs`
+
 ## License
 
 MIT
