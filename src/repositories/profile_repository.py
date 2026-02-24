@@ -172,6 +172,11 @@ class ProfileRepository:
             Updated or created UserProfile
         """
         from src.api.models.profiles import QueryHistoryItem
+        import re
+        
+        # If no location from context, try to extract from query
+        if not location:
+            location = self._extract_location_from_query(query)
         
         profile = await self.get_profile(user_id)
         
@@ -216,3 +221,27 @@ class ProfileRepository:
         await self.save_profile(profile)
         
         return profile
+    
+    def _extract_location_from_query(self, query: str) -> Optional[str]:
+        """
+        Extract location from query text.
+        
+        Args:
+            query: Query text
+        
+        Returns:
+            Extracted location or None
+        """
+        import re
+        
+        # Pattern: "in [Location]"
+        match = re.search(r'\bin\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z]{2})?)', query)
+        if match:
+            return match.group(1).strip()
+        
+        # Pattern: "[Location] weather/hotels/etc"
+        match = re.search(r'([A-Z][a-zA-Z\s]+(?:,\s*[A-Z]{2})?)\s+(weather|hotel|flight)', query)
+        if match:
+            return match.group(1).strip()
+        
+        return None
