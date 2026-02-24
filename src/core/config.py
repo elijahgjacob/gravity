@@ -33,6 +33,14 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: str = ""
     GRAPHITI_LLM_MODEL: str = "anthropic/claude-3.5-sonnet"
     GRAPHITI_NAMESPACE: str = "ad_retrieval"
+    
+    # Profile Analysis settings
+    PROFILE_ANALYSIS_ENABLED: bool = True
+    PROFILE_CACHE_SIZE: int = 10000
+    PROFILE_CACHE_TTL_SECONDS: int = 604800  # 7 days
+    PROFILE_ANALYSIS_TRIGGER_EVERY_N_QUERIES: int = 5
+    PATTERN_RULES_PATH: str = "data/pattern_rules.json"
+    PATTERN_CONFIDENCE_THRESHOLD: float = 0.75
 
     class Config:
         env_file = ".env"

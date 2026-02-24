@@ -22,6 +22,13 @@ except ImportError:
     GraphitiService = None
     GraphitiRepository = None
 
+from src.repositories.profile_repository import ProfileRepository
+from src.services.pattern_detector import PatternDetector
+from src.services.profile_analyzer import ProfileAnalyzer
+from src.services.pattern_rules import DEFAULT_RULES, RuleSet
+import json
+import os
+
 logger = get_logger(__name__)
 
 # Singleton repositories and services (loaded once at startup)
@@ -31,6 +38,8 @@ _vector_repo: VectorRepository | None = None
 _campaign_repo: CampaignRepository | None = None
 _embedding_service: EmbeddingService | None = None
 _graphiti_repo: "GraphitiRepository | None" = None
+_profile_repo: ProfileRepository | None = None
+_profile_analyzer: ProfileAnalyzer | None = None
 _repositories_initialized = False
 
 
@@ -45,11 +54,13 @@ async def init_dependencies():
     - Campaign repository
     - Embedding service (loads model at startup to avoid first-request penalty)
     - Graphiti repository (optional)
+    - Profile repository and analyzer (optional)
     
     Called once during FastAPI startup event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _embedding_service, _graphiti_repo, _repositories_initialized
+    global _embedding_service, _graphiti_repo, _profile_repo, _profile_analyzer
+    global _repositories_initialized
 
     if _repositories_initialized:
         logger.warning("Dependencies already initialized")
@@ -94,6 +105,47 @@ async def init_dependencies():
         else:
             logger.info("Graphiti disabled (GRAPHITI_ENABLED=false)")
             _graphiti_repo = None
+        
+        # Initialize Profile Analysis (optional - graceful degradation)
+        if settings.PROFILE_ANALYSIS_ENABLED:
+            try:
+                # Initialize profile repository
+                _profile_repo = ProfileRepository(
+                    max_size=settings.PROFILE_CACHE_SIZE,
+                    ttl_seconds=settings.PROFILE_CACHE_TTL_SECONDS
+                )
+                logger.info("✓ Profile repository initialized (in-memory cache)")
+                
+                # Load pattern rules
+                rules = DEFAULT_RULES
+                if os.path.exists(settings.PATTERN_RULES_PATH):
+                    try:
+                        with open(settings.PATTERN_RULES_PATH, 'r') as f:
+                            rules_data = json.load(f)
+                            rule_set = RuleSet(**rules_data)
+                            rules = rule_set.get_enabled_rules()
+                        logger.info(f"✓ Loaded {len(rules)} pattern rules from {settings.PATTERN_RULES_PATH}")
+                    except Exception as e:
+                        logger.warning(f"Failed to load pattern rules file: {e}, using defaults")
+                else:
+                    logger.info(f"✓ Using {len(rules)} default pattern rules")
+                
+                # Initialize pattern detector
+                pattern_detector = PatternDetector(rules)
+                
+                # Initialize profile analyzer
+                _profile_analyzer = ProfileAnalyzer(_profile_repo, pattern_detector)
+                logger.info("✓ Profile analyzer initialized")
+                
+            except Exception as e:
+                logger.warning(f"Profile analysis initialization failed (optional): {e}")
+                logger.info("Continuing without profile analysis - system will work normally")
+                _profile_repo = None
+                _profile_analyzer = None
+        else:
+            logger.info("Profile analysis disabled (PROFILE_ANALYSIS_ENABLED=false)")
+            _profile_repo = None
+            _profile_analyzer = None
 
         _repositories_initialized = True
         logger.info("All dependencies initialized successfully")
@@ -139,7 +191,9 @@ def get_retrieval_controller() -> RetrievalController:
         embedding_service=_embedding_service,
         search_service=search_service,
         ranking_service=ranking_service,
-        graphiti_service=graphiti_service
+        graphiti_service=graphiti_service,
+        profile_repo=_profile_repo,
+        profile_analyzer=_profile_analyzer
     )
 
 
@@ -158,6 +212,8 @@ def get_dependencies_status() -> dict:
             "vector": _vector_repo is not None,
             "campaign": _campaign_repo is not None,
             "graphiti": _graphiti_repo is not None and _graphiti_repo.is_initialized,
+            "profile": _profile_repo is not None,
+            "profile_analyzer": _profile_analyzer is not None,
         },
         "stats": (
             {
@@ -181,7 +237,8 @@ async def shutdown_dependencies():
     Called during FastAPI shutdown event.
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
-    global _embedding_service, _graphiti_repo, _repositories_initialized
+    global _embedding_service, _graphiti_repo, _profile_repo, _profile_analyzer
+    global _repositories_initialized
 
     logger.info("Shutting down dependencies...")
     
@@ -200,6 +257,8 @@ async def shutdown_dependencies():
     _campaign_repo = None
     _embedding_service = None
     _graphiti_repo = None
+    _profile_repo = None
+    _profile_analyzer = None
     _repositories_initialized = False
 
     # Clear LRU cache
