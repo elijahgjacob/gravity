@@ -5,7 +5,6 @@ This service converts queries and campaigns to vector representations
 using sentence-transformers for semantic similarity search.
 """
 
-import asyncio
 from typing import List
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -53,10 +52,8 @@ class EmbeddingService:
         category_text = ' '.join(categories) if categories else ''
         combined_text = f"{query} {category_text}".strip()
         
-        # Generate embedding in thread pool to avoid blocking event loop
-        # This allows concurrent requests to make progress in parallel
-        embedding = await asyncio.to_thread(
-            self.model.encode,
+        # Generate embedding (synchronous operation, but wrapped in async for consistency)
+        embedding = self.model.encode(
             combined_text,
             convert_to_numpy=True,
             show_progress_bar=False
