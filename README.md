@@ -2,6 +2,30 @@
 
 A high-performance ad retrieval API that classifies commercial intent, extracts categories, and returns relevant campaigns within a **100ms latency budget**.
 
+## Demo UI
+
+Interactive demo available at the root URL (`/`) when deployed or running locally.
+
+**Features:**
+- Interactive query testing with example queries
+- Optional context fields (age, gender, location, interests)
+- Real-time results display with relevance scores
+- Performance metrics visualization
+- Campaign details with targeting information
+
+**Local Development:**
+```bash
+# Terminal 1: Start backend
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+
+# Terminal 2: Start frontend dev server (with hot reload)
+cd frontend && npm run dev
+
+# Or build and serve from FastAPI:
+cd frontend && npm run build && cd ..
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+```
+
 ## Overview
 
 This system processes user queries with optional context to:
