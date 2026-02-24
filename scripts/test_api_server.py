@@ -7,22 +7,23 @@ Then run this script:
     python scripts/test_api_server.py
 """
 
-import sys
-import requests
 import json
+import sys
+
+import requests
 
 
 def test_api():
     """Test the API endpoints."""
     base_url = "http://localhost:8000"
-    
+
     print("=" * 60)
     print("API SERVER TEST")
     print("=" * 60)
     print("\nℹ️  Make sure the server is running in another terminal:")
     print("   uvicorn src.api.main:app --reload")
     print()
-    
+
     # Test 1: Root endpoint
     print("1. Testing root endpoint...")
     try:
@@ -30,7 +31,7 @@ def test_api():
         print(f"   Status: {response.status_code}")
         print(f"   Response: {json.dumps(response.json(), indent=2)}")
     except requests.exceptions.ConnectionError:
-        print(f"   ❌ Connection refused - Server is not running!")
+        print("   ❌ Connection refused - Server is not running!")
         print()
         print("   Start the server first:")
         print("   1. Open a new terminal")
@@ -43,20 +44,20 @@ def test_api():
     except Exception as e:
         print(f"   ❌ Error: {e}")
         sys.exit(1)
-    
+
     # Test 2: Health check
     print("\n2. Testing health endpoint...")
     response = requests.get(f"{base_url}/api/health")
     print(f"   Status: {response.status_code}")
     print(f"   Response: {json.dumps(response.json(), indent=2)}")
     print(f"   Latency: {response.headers.get('X-Latency-Ms')}ms")
-    
+
     # Test 3: Readiness check
     print("\n3. Testing readiness endpoint...")
     response = requests.get(f"{base_url}/api/ready")
     print(f"   Status: {response.status_code}")
     print(f"   Response: {json.dumps(response.json(), indent=2)}")
-    
+
     # Test 4: Retrieve endpoint
     print("\n4. Testing retrieve endpoint...")
     request_data = {
@@ -65,10 +66,10 @@ def test_api():
             "gender": "male",
             "age": 24,
             "location": "San Francisco, CA",
-            "interests": ["fitness", "outdoor activities"]
-        }
+            "interests": ["fitness", "outdoor activities"],
+        },
     }
-    
+
     response = requests.post(f"{base_url}/api/retrieve", json=request_data)
     print(f"   Status: {response.status_code}")
     data = response.json()
@@ -77,7 +78,7 @@ def test_api():
     print(f"   Campaigns: {len(data['campaigns'])}")
     print(f"   Latency: {data['latency_ms']}ms")
     print(f"   Metadata: {json.dumps(data['metadata'], indent=2)}")
-    
+
     # Test 5: OpenAPI docs
     print("\n5. Testing OpenAPI documentation...")
     response = requests.get(f"{base_url}/openapi.json")
@@ -86,7 +87,7 @@ def test_api():
     print(f"   API Title: {schema['info']['title']}")
     print(f"   API Version: {schema['info']['version']}")
     print(f"   Endpoints: {len(schema['paths'])} paths")
-    
+
     print("\n" + "=" * 60)
     print("✅ ALL API TESTS PASSED")
     print("=" * 60)

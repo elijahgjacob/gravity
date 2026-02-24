@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     """
     Lifespan context manager for startup and shutdown events.
-    
+
     Args:
         app: FastAPI application instance
     """
@@ -26,9 +26,9 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Ad Retrieval API...")
     await init_dependencies()
     logger.info("Ad Retrieval API started successfully")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Ad Retrieval API...")
     await shutdown_dependencies()
@@ -71,28 +71,27 @@ app.add_middleware(
 async def add_latency_header(request: Request, call_next):
     """
     Middleware to track and add latency information to responses.
-    
+
     Args:
         request: Incoming request
         call_next: Next middleware/handler
-    
+
     Returns:
         Response with X-Latency-Ms header
     """
     start_time = time.perf_counter()
-    
+
     response = await call_next(request)
-    
+
     latency_ms = (time.perf_counter() - start_time) * 1000
     response.headers["X-Latency-Ms"] = f"{latency_ms:.2f}"
-    
+
     # Log slow requests (>100ms)
     if latency_ms > 100:
         logger.warning(
-            f"Slow request: {request.method} {request.url.path} "
-            f"took {latency_ms:.2f}ms"
+            f"Slow request: {request.method} {request.url.path} " f"took {latency_ms:.2f}ms"
         )
-    
+
     return response
 
 
@@ -100,40 +99,25 @@ async def add_latency_header(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     """
     Global exception handler for unhandled errors.
-    
+
     Args:
         request: Request that caused the error
         exc: Exception that was raised
-    
+
     Returns:
         JSON error response
     """
-    logger.error(
-        f"Unhandled exception: {request.method} {request.url.path}",
-        exc_info=exc
-    )
-    
+    logger.error(f"Unhandled exception: {request.method} {request.url.path}", exc_info=exc)
+
     return JSONResponse(
-        status_code=500,
-        content={
-            "detail": "Internal server error",
-            "path": str(request.url.path)
-        }
+        status_code=500, content={"detail": "Internal server error", "path": str(request.url.path)}
     )
 
 
 # Register routes
-app.include_router(
-    retrieval.router,
-    prefix="/api",
-    tags=["retrieval"]
-)
+app.include_router(retrieval.router, prefix="/api", tags=["retrieval"])
 
-app.include_router(
-    health.router,
-    prefix="/api",
-    tags=["health"]
-)
+app.include_router(health.router, prefix="/api", tags=["health"])
 
 
 @app.get("/", include_in_schema=False)
@@ -143,5 +127,5 @@ async def root():
         "message": "Ad Retrieval API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/api/health"
+        "health": "/api/health",
     }
