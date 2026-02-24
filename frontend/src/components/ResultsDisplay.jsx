@@ -10,11 +10,11 @@ export default function ResultsDisplay({ results }) {
   if (!results) {
     return (
       <Card className="border-dashed border-2 bg-muted/50">
-        <div className="p-12 text-center">
-          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-muted-foreground" />
+        <div className="p-6 text-center">
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+            <Search className="w-6 h-6 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground text-lg">Enter a query above to see relevant ad campaigns</p>
+          <p className="text-muted-foreground text-sm">Enter a query above to see relevant ad campaigns</p>
         </div>
       </Card>
     )
@@ -30,19 +30,19 @@ export default function ResultsDisplay({ results }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <Card className="shadow-md bg-card">
-        <CardHeader className="pb-4">
-          <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded-lg">
-                <Award className="w-5 h-5 text-foreground" />
+        <CardHeader className="py-3 px-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-muted rounded">
+                <Award className="w-4 h-4 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Ad Eligibility</p>
+                <p className="text-xs font-medium text-muted-foreground">Ad Eligibility</p>
                 <Badge 
                   variant={ad_eligibility >= 0.8 ? "default" : ad_eligibility >= 0.5 ? "secondary" : "outline"}
-                  className={`text-base font-bold mt-1 ${
+                  className={`text-sm font-bold mt-0.5 ${
                     ad_eligibility >= 0.8 ? 'bg-emerald-600 text-white' : 
                     ad_eligibility >= 0.5 ? 'bg-amber-500 text-white' : 
                     ''
@@ -53,13 +53,13 @@ export default function ResultsDisplay({ results }) {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 flex-1">
-              <div className="p-2 bg-muted rounded-lg">
-                <Tag className="w-5 h-5 text-foreground" />
+            <div className="flex items-start gap-2 flex-1">
+              <div className="p-1.5 bg-muted rounded">
+                <Tag className="w-4 h-4 text-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Categories</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Categories</p>
+                <div className="flex flex-wrap gap-1">
                   {extracted_categories.map((cat, idx) => (
                     <Badge key={idx} variant="secondary" className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border-blue-500/30">
                       {cat}
@@ -69,29 +69,29 @@ export default function ResultsDisplay({ results }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded-lg">
-                <TrendingUp className="w-5 h-5 text-foreground" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-muted rounded">
+                <TrendingUp className="w-4 h-4 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Campaigns</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{campaigns.length}</p>
+                <p className="text-xs font-medium text-muted-foreground">Total Campaigns</p>
+                <p className="text-lg font-bold text-foreground mt-0.5">{campaigns.length}</p>
               </div>
             </div>
           </div>
         </CardHeader>
       </Card>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {displayedCampaigns.map((campaign, idx) => (
           <Card 
             key={campaign.id} 
-            className="hover:border-primary/50 hover:shadow-lg transition-all duration-200 bg-card group"
+            className="hover:border-primary/50 hover:shadow-md transition-all duration-200 bg-card group"
           >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold text-xs">
                     {idx + 1}
                   </div>
                   <Badge className="bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -107,10 +107,10 @@ export default function ResultsDisplay({ results }) {
                 </Badge>
               </div>
 
-              <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary/80 transition-colors">
+              <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary/80 transition-colors">
                 {campaign.title}
               </h3>
-              <p className="text-muted-foreground leading-relaxed mb-4">
+              <p className="text-sm text-muted-foreground leading-snug mb-2">
                 {campaign.description}
               </p>
 

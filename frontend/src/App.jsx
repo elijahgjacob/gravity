@@ -18,6 +18,7 @@ function App() {
   const [lastRequest, setLastRequest] = useState(null)
   const [lastResponse, setLastResponse] = useState(null)
   const [selectedUserIdForSearch, setSelectedUserIdForSearch] = useState(null)
+  const [searchSuccessWithUserId, setSearchSuccessWithUserId] = useState(null)
 
   const handleSearch = async (requestData) => {
     const payload = { ...requestData }
@@ -35,7 +36,8 @@ function App() {
       setResults(response.data)
       setLatency(response.data.latency_ms)
       setLastResponse(response.data)
-      
+      if (payload.user_id) setSearchSuccessWithUserId(payload.user_id)
+
       console.log('Search completed:', {
         query: payload.query,
         user_id: payload.user_id,
@@ -55,27 +57,27 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-0.5">
                 Gravity
               </h1>
-              <p className="text-muted-foreground text-lg">High-Performance Ad Retrieval System</p>
+              <p className="text-muted-foreground text-sm">High-Performance Ad Retrieval System</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex gap-3">
-                <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
-                  <Database className="w-3.5 h-3.5" />
-                  10,000 Campaigns
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <Badge variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-[11px]">
+                  <Database className="w-3 h-3" />
+                  10k
                 </Badge>
-                <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
-                  <Target className="w-3.5 h-3.5" />
-                  &lt; 100ms p95
+                <Badge variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-[11px]">
+                  <Target className="w-3 h-3" />
+                  &lt;100ms
                 </Badge>
-                <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-xs">
-                  <Zap className="w-3.5 h-3.5" />
-                  384D Vector
+                <Badge variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-[11px]">
+                  <Zap className="w-3 h-3" />
+                  384D
                 </Badge>
               </div>
               <ThemeToggle />
@@ -84,30 +86,33 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 py-8 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_340px] gap-6">
-          <div className="space-y-6 min-w-0">
+      <main className="flex-1 py-4 px-4">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_300px] gap-4">
+          <div className="space-y-4 min-w-0">
             <div className="animate-slide-down">
-              <UserSummaryPanel onSelectUser={setSelectedUserIdForSearch} />
+              <UserSummaryPanel
+                onSelectUser={setSelectedUserIdForSearch}
+                searchSuccessWithUserId={searchSuccessWithUserId}
+              />
             </div>
 
             <Card className="animate-slide-down shadow-md">
-              <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Search Query</h2>
+              <div className="p-4">
+                <h2 className="text-lg font-semibold mb-3 text-foreground">Search Query</h2>
                 <QueryInput onSubmit={handleSearch} loading={loading} />
               </div>
             </Card>
 
             {error && (
               <Card className="border-destructive/50 bg-destructive/10 animate-slide-down">
-                <div className="p-4">
-                  <p className="text-destructive font-medium"><strong>Error:</strong> {error}</p>
+                <div className="p-3">
+                  <p className="text-destructive text-sm font-medium"><strong>Error:</strong> {error}</p>
                 </div>
               </Card>
             )}
 
             <div className="animate-slide-up">
-              <h2 className="text-2xl font-semibold mb-4 text-foreground px-1">
+              <h2 className="text-lg font-semibold mb-3 text-foreground px-0.5">
                 {results ? `Results (${results.campaigns.length} campaigns)` : 'Results'}
               </h2>
               <ResultsDisplay results={results} />
@@ -121,7 +126,7 @@ function App() {
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-24 h-fit space-y-4">
+          <aside className="lg:sticky lg:top-20 h-fit space-y-3">
             <div className="animate-fade-in">
               <MetricsPanel 
                 metrics={results?.metadata} 
@@ -132,7 +137,7 @@ function App() {
         </div>
       </main>
 
-      <footer className="border-t border-border bg-card text-muted-foreground py-6 px-6 text-center text-sm">
+      <footer className="border-t border-border bg-card text-muted-foreground py-3 px-4 text-center text-xs">
         <p>
           Powered by FastAPI + React | 
           <a href="/api/docs" target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline ml-2"> API Docs</a> | 

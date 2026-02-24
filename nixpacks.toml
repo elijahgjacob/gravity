@@ -1,0 +1,6 @@
+# Ensure both Python (backend) and Node (frontend build) are available.
+# Railway uses railway.json buildCommand; this file adds Node to the Nixpacks environment.
+providers = ["python", "node"]
+
+[phases.setup]
+nixPkgs = ["pkgs.python311", "pkgs.nodejs", "pkgs.npm"]

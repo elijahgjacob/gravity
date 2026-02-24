@@ -52,9 +52,9 @@ class ProfileSummaryService:
         }
         profile_text = json.dumps(prompt_data, indent=2)
 
-        return f"""You are an ad campaign strategist. Based on the following user profile (from their search queries and inferred intents), produce:
-1. A short narrative summary (2-4 sentences) describing what we know about this user and their likely goals (e.g. "User is preparing for the Boston Marathon in June and has already booked a hotel; they have been searching for running gear and Boston weather.").
-2. A list of 3-6 concrete suggested ad campaign types that would be relevant (e.g. "Airline campaigns to Boston", "Car rental in Boston", "Event/race gear"). Use locations and details from the profile when available (e.g. marathon_planning with location Boston → suggest airline to Boston, car rental Boston).
+        return f"""You are an ad campaign strategist. From the user profile below (queries + inferred intents), produce:
+1. A short narrative (2-4 sentences) on what we know and their likely goals or next steps (e.g. preparing for Boston Marathon, searching running gear and Boston weather).
+2. 3-6 specific, actionable ad campaign suggestions. Derive from intent_type, inferred_categories, and metadata (e.g. location): e.g. marathon_planning + Boston → "Flights to Boston", "Car rental Boston", "Running/race gear".
 
 User profile data:
 {profile_text}
