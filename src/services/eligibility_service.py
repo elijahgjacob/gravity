@@ -5,7 +5,6 @@ This service determines whether it's appropriate to show ads for a given query
 by analyzing content for safety concerns, sensitive topics, and commercial intent.
 """
 
-import asyncio
 import re
 from typing import Optional, List, Tuple
 from src.repositories.blocklist_repository import BlocklistRepository
@@ -50,13 +49,6 @@ class EligibilityService:
             Tuple of (score, rejection_reason):
             - score: 0.0 to 1.0 (0.0 = blocked, 0.4-0.7 = sensitive, 0.8-1.0 = appropriate)
             - rejection_reason: Human-readable reason if score is 0.0, None otherwise
-        """
-        # Offload CPU-bound regex operations to thread pool
-        return await asyncio.to_thread(self._score_sync, query, context)
-    
-    def _score_sync(self, query: str, context: Optional[dict] = None) -> Tuple[float, Optional[str]]:
-        """
-        Synchronous scoring logic (runs in thread pool).
         """
         # Priority 0: Content safety validation (NEW)
         # Check for illegal items, security threats, low quality queries
