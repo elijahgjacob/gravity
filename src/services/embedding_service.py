@@ -5,7 +5,6 @@ This service converts queries and campaigns to vector representations
 using sentence-transformers for semantic similarity search.
 """
 
-from typing import List
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
@@ -13,17 +12,17 @@ from sentence_transformers import SentenceTransformer
 class EmbeddingService:
     """
     SERVICE: Business logic for text embedding.
-    
+
     Converts queries and campaigns to 384-dimensional vector representations
     using the all-MiniLM-L6-v2 model for fast, local inference.
-    
+
     Performance: ~5-10ms per query embedding
     """
-    
-    def __init__(self, model_name: str = 'all-MiniLM-L6-v2'):
+
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         """
         Initialize the embedding service.
-        
+
         Args:
             model_name: Name of the sentence-transformers model to use
                        Default: all-MiniLM-L6-v2 (384 dims, fast inference)
@@ -32,54 +31,47 @@ class EmbeddingService:
         self.model = SentenceTransformer(model_name)
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
         print(f"Loaded embedding model: {model_name} ({self.embedding_dim} dimensions)")
-    
-    async def embed_query(self, query: str, categories: List[str]) -> np.ndarray:
+
+    async def embed_query(self, query: str, categories: list[str]) -> np.ndarray:
         """
         Embed query text combined with extracted categories.
-        
+
         Combines the query with category names to create a richer embedding
         that captures both the user's intent and the extracted categories.
-        
+
         Args:
             query: The user's query text
             categories: List of extracted category names
-        
+
         Returns:
             numpy array of shape (embedding_dim,) - typically 384 dimensions
         """
         # Combine query + categories for richer embedding
         # This helps the embedding capture both semantic meaning and category context
-        category_text = ' '.join(categories) if categories else ''
+        category_text = " ".join(categories) if categories else ""
         combined_text = f"{query} {category_text}".strip()
-        
+
         # Generate embedding (synchronous operation, but wrapped in async for consistency)
-        embedding = self.model.encode(
-            combined_text,
-            convert_to_numpy=True,
-            show_progress_bar=False
-        )
-        
+        embedding = self.model.encode(combined_text, convert_to_numpy=True, show_progress_bar=False)
+
         return embedding
-    
+
     def embed_campaigns_batch(
-        self, 
-        campaigns: List[dict],
-        batch_size: int = 32,
-        show_progress: bool = True
+        self, campaigns: list[dict], batch_size: int = 32, show_progress: bool = True
     ) -> np.ndarray:
         """
         Batch embed campaigns for offline index building.
-        
+
         Combines campaign title, description, and keywords into a single
         text representation, then generates embeddings for all campaigns.
-        
+
         This is used offline to pre-compute embeddings for the FAISS index.
-        
+
         Args:
             campaigns: List of campaign dictionaries with title, description, keywords
             batch_size: Number of campaigns to embed at once (default: 32)
             show_progress: Whether to show progress bar (default: True)
-        
+
         Returns:
             numpy array of shape (N, embedding_dim) where N is number of campaigns
         """
@@ -87,29 +79,29 @@ class EmbeddingService:
         texts = []
         for campaign in campaigns:
             # Combine title, description, and keywords
-            title = campaign.get('title', '')
-            description = campaign.get('description', '')
-            keywords = ' '.join(campaign.get('keywords', []))
-            
+            title = campaign.get("title", "")
+            description = campaign.get("description", "")
+            keywords = " ".join(campaign.get("keywords", []))
+
             # Create rich text representation
             text = f"{title} {description} {keywords}".strip()
             texts.append(text)
-        
+
         # Batch encode all campaigns
         embeddings = self.model.encode(
             texts,
             batch_size=batch_size,
             convert_to_numpy=True,
             show_progress_bar=show_progress,
-            normalize_embeddings=False  # FAISS will handle normalization if needed
+            normalize_embeddings=False,  # FAISS will handle normalization if needed
         )
-        
+
         return embeddings
-    
+
     def get_embedding_dimension(self) -> int:
         """
         Get the dimensionality of embeddings produced by this service.
-        
+
         Returns:
             Integer dimension (typically 384 for all-MiniLM-L6-v2)
         """

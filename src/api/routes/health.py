@@ -20,18 +20,17 @@ router = APIRouter()
 async def health_check() -> HealthResponse:
     """
     Health check endpoint.
-    
+
     Returns:
         Health status and version information
     """
     deps_status = get_dependencies_status()
-    
+
     if not deps_status["initialized"]:
         logger.warning("Health check: dependencies not initialized")
-    
+
     return HealthResponse(
-        status="healthy" if deps_status["initialized"] else "initializing",
-        version="1.0.0"
+        status="healthy" if deps_status["initialized"] else "initializing", version="1.0.0"
     )
 
 
@@ -44,14 +43,14 @@ async def health_check() -> HealthResponse:
 async def readiness_check() -> dict:
     """
     Readiness check endpoint.
-    
+
     Returns:
         Readiness status with dependency details and statistics
     """
     deps_status = get_dependencies_status()
-    
+
     return {
         "ready": deps_status["initialized"],
         "dependencies": deps_status["repositories"],
-        "stats": deps_status.get("stats", {})
+        "stats": deps_status.get("stats", {}),
     }

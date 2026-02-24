@@ -1,6 +1,6 @@
 """Retrieval endpoint routes."""
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.models.requests import RetrievalRequest
 from src.api.models.responses import RetrievalResponse
@@ -37,39 +37,38 @@ router = APIRouter()
                         "extracted_categories": ["running_shoes", "marathon_gear"],
                         "campaigns": [],
                         "latency_ms": 67.5,
-                        "metadata": {}
+                        "metadata": {},
                     }
                 }
-            }
+            },
         },
         400: {"description": "Invalid request"},
-        500: {"description": "Internal server error"}
-    }
+        500: {"description": "Internal server error"},
+    },
 )
 async def retrieve_ads(
-    request: RetrievalRequest,
-    controller: RetrievalController = Depends(get_retrieval_controller)
+    request: RetrievalRequest, controller: RetrievalController = Depends(get_retrieval_controller)
 ) -> RetrievalResponse:
     """
     Retrieve relevant ad campaigns for a user query.
-    
+
     Args:
         request: Retrieval request with query and optional context
         controller: Injected retrieval controller
-    
+
     Returns:
         Retrieval response with campaigns and metadata
-    
+
     Raises:
         HTTPException: If processing fails
     """
     try:
         response = await controller.retrieve(request)
         return response
-        
+
     except Exception as e:
         logger.error(f"Error processing retrieval request: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process retrieval request"
+            detail="Failed to process retrieval request",
         )
