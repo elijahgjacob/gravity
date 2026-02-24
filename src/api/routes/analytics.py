@@ -1,14 +1,38 @@
 """Analytics endpoints for profile inference monitoring."""
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional
-from src.core.dependencies import get_retrieval_controller
+from src.core.dependencies import get_retrieval_controller, get_profile_summary_service
 from src.controllers.retrieval_controller import RetrievalController
+from src.services.profile_summary_service import ProfileSummaryService
 from src.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
+
+
+@router.get("/users")
+async def list_users(
+    controller: RetrievalController = Depends(get_retrieval_controller)
+):
+    """
+    List all user IDs currently in the profile cache.
+    
+    Returns:
+        Dictionary with user_ids array (empty if none or profile repo disabled).
+    """
+    if not controller.profile_repo:
+        raise HTTPException(
+            status_code=503,
+            detail="Profile repository not enabled"
+        )
+    try:
+        user_ids = await controller.profile_repo.get_all_user_ids()
+        return {"status": "ok", "user_ids": user_ids}
+    except Exception as e:
+        logger.error(f"Failed to list users: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/profile-stats")
@@ -117,6 +141,53 @@ async def trigger_profile_analysis(
         raise
     except Exception as e:
         logger.error(f"Failed to analyze profile for {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/profile/{user_id}/summary")
+async def get_user_profile_summary(
+    user_id: str,
+    analyze: bool = Query(False, description="Run profile analysis before summarizing"),
+    controller: RetrievalController = Depends(get_retrieval_controller),
+    summary_service: Optional[ProfileSummaryService] = Depends(get_profile_summary_service),
+):
+    """
+    Get profile and LLM-generated summary (narrative + suggested ad campaigns) for a user.
+    
+    If analyze=true, runs profile analysis first to refresh inferred intents.
+    Returns profile always; summary is null when LLM/summary service is not available.
+    """
+    if not controller.profile_repo:
+        raise HTTPException(
+            status_code=503,
+            detail="Profile repository not enabled"
+        )
+    try:
+        profile = await controller.profile_repo.get_profile(user_id)
+        if not profile:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Profile not found for user: {user_id}"
+            )
+        if analyze and controller.profile_analyzer:
+            profile = await controller.profile_analyzer.analyze_user(user_id)
+            if profile is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Profile not found for user: {user_id}"
+                )
+        summary = None
+        if summary_service:
+            summary = await summary_service.generate_summary(profile)
+        return {
+            "status": "ok",
+            "profile": profile.model_dump(),
+            "summary": summary,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get profile summary for {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

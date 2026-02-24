@@ -25,6 +25,7 @@ except ImportError:
 from src.repositories.profile_repository import ProfileRepository
 from src.services.pattern_detector import PatternDetector
 from src.services.profile_analyzer import ProfileAnalyzer
+from src.services.profile_summary_service import ProfileSummaryService
 from src.services.pattern_rules import DEFAULT_RULES, RuleSet
 import json
 import os
@@ -40,6 +41,7 @@ _embedding_service: EmbeddingService | None = None
 _graphiti_repo: "GraphitiRepository | None" = None
 _profile_repo: ProfileRepository | None = None
 _profile_analyzer: ProfileAnalyzer | None = None
+_profile_summary_service: ProfileSummaryService | None = None
 _repositories_initialized = False
 
 
@@ -60,7 +62,7 @@ async def init_dependencies():
     """
     global _blocklist_repo, _taxonomy_repo, _vector_repo, _campaign_repo
     global _embedding_service, _graphiti_repo, _profile_repo, _profile_analyzer
-    global _repositories_initialized
+    global _profile_summary_service, _repositories_initialized
 
     if _repositories_initialized:
         logger.warning("Dependencies already initialized")
@@ -137,15 +139,27 @@ async def init_dependencies():
                 _profile_analyzer = ProfileAnalyzer(_profile_repo, pattern_detector)
                 logger.info("✓ Profile analyzer initialized")
                 
+                # Profile summary service (LLM) - only when OpenRouter key is set
+                if settings.OPENROUTER_API_KEY:
+                    _profile_summary_service = ProfileSummaryService(
+                        api_key=settings.OPENROUTER_API_KEY,
+                        model=settings.PROFILE_SUMMARY_LLM_MODEL,
+                    )
+                    logger.info("✓ Profile summary service initialized (OpenRouter)")
+                else:
+                    _profile_summary_service = None
+                
             except Exception as e:
                 logger.warning(f"Profile analysis initialization failed (optional): {e}")
                 logger.info("Continuing without profile analysis - system will work normally")
                 _profile_repo = None
                 _profile_analyzer = None
+                _profile_summary_service = None
         else:
             logger.info("Profile analysis disabled (PROFILE_ANALYSIS_ENABLED=false)")
             _profile_repo = None
             _profile_analyzer = None
+            _profile_summary_service = None
 
         _repositories_initialized = True
         logger.info("All dependencies initialized successfully")
@@ -214,6 +228,7 @@ def get_dependencies_status() -> dict:
             "graphiti": _graphiti_repo is not None and _graphiti_repo.is_initialized,
             "profile": _profile_repo is not None,
             "profile_analyzer": _profile_analyzer is not None,
+            "profile_summary": _profile_summary_service is not None,
         },
         "stats": (
             {
@@ -259,9 +274,20 @@ async def shutdown_dependencies():
     _graphiti_repo = None
     _profile_repo = None
     _profile_analyzer = None
+    _profile_summary_service = None
     _repositories_initialized = False
 
     # Clear LRU cache
+    _profile_summary_service = None
     get_retrieval_controller.cache_clear()
 
     logger.info("Dependencies shut down successfully")
+
+
+def get_profile_summary_service() -> ProfileSummaryService | None:
+    """
+    Get the profile summary service (LLM) if available.
+
+    Returns None when OPENROUTER_API_KEY is not set or profile analysis is disabled.
+    """
+    return _profile_summary_service

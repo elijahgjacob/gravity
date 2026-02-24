@@ -4,6 +4,7 @@ import QueryInput from './components/QueryInput'
 import ResultsDisplay from './components/ResultsDisplay'
 import MetricsPanel from './components/MetricsPanel'
 import RequestResponseViewer from './components/RequestResponseViewer'
+import UserSummaryPanel from './components/UserSummaryPanel'
 
 function App() {
   const [results, setResults] = useState(null)
@@ -62,6 +63,7 @@ function App() {
       <main className="app-main">
         <div className="content-wrapper">
           <div className="main-content">
+            <UserSummaryPanel />
             <section className="query-section">
               <h2>Search Query</h2>
               <QueryInput onSubmit={handleSearch} loading={loading} />

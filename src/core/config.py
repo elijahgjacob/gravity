@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     PROFILE_ANALYSIS_TRIGGER_EVERY_N_QUERIES: int = 5
     PATTERN_RULES_PATH: str = "data/pattern_rules.json"
     PATTERN_CONFIDENCE_THRESHOLD: float = 0.75
+    # Profile summary LLM (narrative + suggested campaigns); uses OpenRouter
+    PROFILE_SUMMARY_LLM_MODEL: str = "openai/gpt-3.5-turbo"
 
     class Config:
         env_file = ".env"
