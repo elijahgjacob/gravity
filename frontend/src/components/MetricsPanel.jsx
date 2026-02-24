@@ -1,12 +1,22 @@
 import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
+import { Badge } from './ui/badge'
+import { Clock, Activity, Zap, CheckCircle2, XCircle } from 'lucide-react'
 
 export default function MetricsPanel({ metrics, latency }) {
   if (!metrics && !latency) {
     return (
-      <div className="metrics-panel">
-        <h3>Performance Metrics</h3>
-        <p className="metrics-placeholder">Metrics will appear after your first search</p>
-      </div>
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Activity className="w-5 h-5" />
+            Performance Metrics
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Metrics will appear after your first search
+          </CardDescription>
+        </CardHeader>
+      </Card>
     )
   }
 
@@ -22,89 +32,103 @@ export default function MetricsPanel({ metrics, latency }) {
   }
 
   return (
-    <div className="metrics-panel">
-      <h3>Performance Metrics</h3>
+    <Card className="shadow-md">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <Activity className="w-5 h-5" />
+          Performance Metrics
+        </CardTitle>
+      </CardHeader>
       
-      <div className="metric-card primary">
-        <div className="metric-label">Total Latency</div>
-        <div className={`metric-value ${getLatencyColor(latency)}`}>
-          {formatLatency(latency)}
-        </div>
-        <div className="metric-target">Target: &lt; 100ms</div>
-      </div>
-
-      {metrics && (
-        <>
-          <div className="metric-breakdown">
-            <h4>Breakdown</h4>
-            {metrics.short_circuited ? (
-              <div className="short-circuit-info">
-                <p className="info-text">Request short-circuited</p>
-                <p className="reason">{metrics.reason}</p>
-              </div>
-            ) : (
-              <div className="breakdown-items">
-                <div className="breakdown-item">
-                  <span className="breakdown-label">Eligibility Check</span>
-                  <span className="breakdown-value">~8ms</span>
-                </div>
-                <div className="breakdown-item">
-                  <span className="breakdown-label">Category Extraction</span>
-                  <span className="breakdown-value">~5ms</span>
-                </div>
-                <div className="breakdown-item">
-                  <span className="breakdown-label">Query Embedding</span>
-                  <span className="breakdown-value">~7ms</span>
-                </div>
-                <div className="breakdown-item">
-                  <span className="breakdown-label">Vector Search</span>
-                  <span className="breakdown-value">~2ms</span>
-                </div>
-                <div className="breakdown-item">
-                  <span className="breakdown-label">Relevance Ranking</span>
-                  <span className="breakdown-value">~1ms</span>
-                </div>
-              </div>
-            )}
+      <CardContent className="space-y-5">
+        <div className="p-5 bg-gradient-to-br from-primary to-primary/80 rounded-lg text-primary-foreground shadow-lg">
+          <div className="flex items-center gap-2 mb-2 opacity-90">
+            <Clock className="w-4 h-4" />
+            <span className="text-sm font-medium">Total Latency</span>
           </div>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-4xl font-bold ${
+              latency < 50 ? 'text-emerald-300' :
+              latency < 100 ? 'text-blue-300' :
+              latency < 200 ? 'text-amber-300' :
+              'text-red-300'
+            }`}>
+              {formatLatency(latency)}
+            </span>
+          </div>
+          <p className="text-xs opacity-75 mt-2">Target: &lt; 100ms</p>
+        </div>
 
-          <div className="metric-info">
-            <h4>Request Info</h4>
-            <div className="info-item">
-              <span className="info-label">Campaigns Returned</span>
-              <span className="info-value">{metrics.campaigns_count || 0}</span>
+        {metrics && (
+          <>
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Breakdown
+              </h4>
+              {metrics.short_circuited ? (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <XCircle className="w-4 h-4 text-amber-500" />
+                    <p className="text-sm font-semibold text-amber-500">Request short-circuited</p>
+                  </div>
+                  <p className="text-xs text-amber-400/80">{metrics.reason}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {[
+                    { label: 'Eligibility Check', value: '~8ms' },
+                    { label: 'Category Extraction', value: '~5ms' },
+                    { label: 'Query Embedding', value: '~7ms' },
+                    { label: 'Vector Search', value: '~2ms' },
+                    { label: 'Relevance Ranking', value: '~1ms' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-sm py-1.5 px-2 rounded hover:bg-muted transition-colors">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-semibold text-foreground">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {metrics.short_circuited && (
-              <div className="info-item">
-                <span className="info-label">Short-circuited</span>
-                <span className="info-value">Yes</span>
-              </div>
-            )}
-          </div>
-        </>
-      )}
 
-      <div className="performance-legend">
-        <h4>Performance Guide</h4>
-        <div className="legend-items">
-          <div className="legend-item">
-            <span className="legend-dot excellent"></span>
-            <span>&lt; 50ms: Excellent</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot good"></span>
-            <span>50-100ms: Good</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot fair"></span>
-            <span>100-200ms: Fair</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot slow"></span>
-            <span>&gt; 200ms: Slow</span>
+            <div className="pt-4 border-t border-border space-y-2">
+              <h4 className="text-sm font-semibold text-foreground">Request Info</h4>
+              <div className="flex justify-between items-center text-sm py-1.5">
+                <span className="text-muted-foreground">Campaigns Returned</span>
+                <Badge variant="secondary">
+                  {metrics.campaigns_count || 0}
+                </Badge>
+              </div>
+              {metrics.short_circuited && (
+                <div className="flex justify-between items-center text-sm py-1.5">
+                  <span className="text-muted-foreground">Short-circuited</span>
+                  <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                    Yes
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        <div className="pt-4 border-t border-border space-y-2">
+          <h4 className="text-sm font-semibold text-foreground">Performance Guide</h4>
+          <div className="space-y-1.5">
+            {[
+              { color: 'bg-emerald-500', label: '< 50ms: Excellent' },
+              { color: 'bg-blue-500', label: '50-100ms: Good' },
+              { color: 'bg-amber-500', label: '100-200ms: Fair' },
+              { color: 'bg-red-500', label: '> 200ms: Slow' }
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
+                <span>{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

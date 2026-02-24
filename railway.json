@@ -2,7 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pip install -r requirements.txt && python scripts/generate_data.py && python scripts/build_index.py && echo '=== Building Frontend ===' && cd frontend && npm install && npm run build && cd .. && ls -la frontend/dist && echo '=== Frontend Build Complete ==="
+    "buildCommand": "pip install -r requirements.txt && cd frontend && npm install && npm run build && cd .. && python scripts/generate_data.py && python scripts/build_index.py"
   },
   "deploy": {
     "startCommand": "uvicorn src.api.main:app --host 0.0.0.0 --port $PORT",
