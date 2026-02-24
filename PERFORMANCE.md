@@ -4,12 +4,15 @@
 
 This document summarizes the performance characteristics of the Ad Retrieval API under various load conditions.
 
+⚠️ **Note**: These results are from **local testing** (MacBook). Railway deployment testing is currently blocked by local DNS configuration (OpenDNS blocking Railway domains). See `DEPLOYMENT_TEST.md` for Railway testing instructions from alternative networks.
+
 ## Test Environment
 
 - **Hardware**: MacBook (local testing)
 - **Python**: 3.12
 - **Server**: Uvicorn (single worker)
 - **Dataset**: 10,000 campaigns, 384-dimensional embeddings
+- **Network**: Local (localhost:8000)
 
 ## Sequential Performance
 
