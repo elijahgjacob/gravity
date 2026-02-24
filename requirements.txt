@@ -17,11 +17,16 @@ faker==22.6.0
 
 # Utilities
 python-dotenv==1.0.0
+cachetools==5.3.2
 
 # Testing
 pytest==7.4.4
 pytest-asyncio==0.23.3
 httpx==0.26.0
+
+# Knowledge Graph
+graphiti-core==0.28.1
+neo4j==5.26.0
 
 # Linting & Code Quality
 ruff==0.1.14

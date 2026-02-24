@@ -56,5 +56,7 @@ benchmark_results.json
 # Logs
 *.log
 
-# Neo4j
+# Neo4j / Graphiti
 neo4j_data/
+neo4j_logs/
+*.tar.gz

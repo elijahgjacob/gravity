@@ -34,6 +34,18 @@ class RetrievalRequest(BaseModel):
         ..., min_length=1, max_length=500, description="User's natural language query"
     )
     context: UserContext | None = Field(None, description="Optional user context for targeting")
+    user_id: str | None = Field(
+        None,
+        min_length=1,
+        max_length=100,
+        description="Optional user identifier for profile tracking and personalization"
+    )
+    session_id: str | None = Field(
+        None,
+        min_length=1,
+        max_length=100,
+        description="Optional session identifier for tracking query sequences"
+    )
 
     class Config:
         json_schema_extra = {
@@ -45,5 +57,7 @@ class RetrievalRequest(BaseModel):
                     "location": "San Francisco, CA",
                     "interests": ["fitness", "outdoor activities"],
                 },
+                "user_id": "user_12345",
+                "session_id": "sess_abc123"
             }
         }

@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routes import health, retrieval
+from src.api.routes import health, retrieval, analytics
 from src.core.dependencies import init_dependencies, shutdown_dependencies
 from src.core.logging_config import get_logger
 
@@ -121,6 +121,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(retrieval.router, prefix="/api", tags=["retrieval"])
 
 app.include_router(health.router, prefix="/api", tags=["health"])
+
+app.include_router(analytics.router, tags=["analytics"])
 
 
 # Mount static files for demo UI (if frontend/dist exists)
