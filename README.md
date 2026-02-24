@@ -476,10 +476,15 @@ The application achieves **p95 < 33ms** for sequential requests. Under high conc
    - Reduces load on embedding/search pipeline
    - Can achieve < 10ms for cached results
 
-**Performance under load:**
-- Sequential: p95 = 32ms ✅
-- 10 concurrent: p95 = ~50-80ms ✅ (with proper deployment)
-- 100 concurrent: Requires multiple instances/workers
+**Performance under load (single instance):**
+- Sequential: p95 = 37ms ✅
+- 2-4 concurrent: p95 = 28-78ms ✅
+- 5+ concurrent: p95 > 100ms (requires horizontal scaling)
+
+**Recommended deployment:**
+- **Light traffic** (< 5 concurrent): Single instance sufficient
+- **Medium traffic** (5-20 concurrent): 2-3 instances
+- **Heavy traffic** (20+ concurrent): 4+ instances with auto-scaling
 
 ### Test Coverage
 
