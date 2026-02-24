@@ -5,6 +5,7 @@ This service extracts 1-10 relevant product/service categories from user queries
 using TF-IDF vectorization and keyword matching against a predefined taxonomy.
 """
 
+import asyncio
 from typing import List, Optional, Dict
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
@@ -67,6 +68,18 @@ class CategoryService:
         
         Returns:
             List of 1-10 category names (enforced)
+        """
+        # Offload CPU-bound TF-IDF + regex operations to thread pool
+        return await asyncio.to_thread(self._extract_sync, query, context, max_categories)
+    
+    def _extract_sync(
+        self, 
+        query: str, 
+        context: Optional[dict] = None, 
+        max_categories: int = 10
+    ) -> List[str]:
+        """
+        Synchronous extraction logic (runs in thread pool).
         """
         # Score all categories by keyword similarity
         scores = self._score_categories(query)
