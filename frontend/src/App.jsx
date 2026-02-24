@@ -13,16 +13,19 @@ function App() {
   const [latency, setLatency] = useState(null)
   const [lastRequest, setLastRequest] = useState(null)
   const [lastResponse, setLastResponse] = useState(null)
+  const [selectedUserIdForSearch, setSelectedUserIdForSearch] = useState(null)
 
   const handleSearch = async (requestData) => {
+    const payload = { ...requestData }
+    if (selectedUserIdForSearch) payload.user_id = selectedUserIdForSearch
     setLoading(true)
     setError(null)
-    setLastRequest(requestData)
+    setLastRequest(payload)
     
     const startTime = performance.now()
     
     try {
-      const response = await axios.post('/api/retrieve', requestData)
+      const response = await axios.post('/api/retrieve', payload)
       const endTime = performance.now()
       
       setResults(response.data)
@@ -30,7 +33,8 @@ function App() {
       setLastResponse(response.data)
       
       console.log('Search completed:', {
-        query: requestData.query,
+        query: payload.query,
+        user_id: payload.user_id,
         serverLatency: response.data.latency_ms,
         clientLatency: endTime - startTime,
         campaigns: response.data.campaigns.length
@@ -63,7 +67,7 @@ function App() {
       <main className="app-main">
         <div className="content-wrapper">
           <div className="main-content">
-            <UserSummaryPanel />
+            <UserSummaryPanel onSelectUser={setSelectedUserIdForSearch} />
             <section className="query-section">
               <h2>Search Query</h2>
               <QueryInput onSubmit={handleSearch} loading={loading} />
