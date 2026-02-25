@@ -92,6 +92,30 @@ gravity/
 └── requirements.txt      # Python dependencies
 ```
 
+## Documentation
+
+Comprehensive documentation is organized in the `docs/` directory:
+
+### Core Documentation
+- **[Project Specification](docs/PROJECT_SPECIFICATION.md)** - Original project requirements and specifications
+- **[Graphiti Integration](docs/GRAPHITI_INTEGRATION.md)** - Knowledge graph integration guide
+- **[Profile Inference](docs/PROFILE_INFERENCE.md)** - User profiling and pattern detection system
+
+### Implementation Guides
+- **[Graphiti Setup](docs/implementation/GRAPHITI_SETUP.md)** - Step-by-step setup for Graphiti knowledge graph
+- **[Graphiti Progress](docs/implementation/GRAPHITI_PROGRESS.md)** - Development progress and milestones
+- **[Profile Inference Implementation](docs/implementation/PROFILE_INFERENCE_IMPLEMENTATION.md)** - Technical implementation details
+- **[Content Safety Improvements](docs/implementation/CONTENT_SAFETY_IMPROVEMENTS.md)** - Safety filtering enhancements
+
+### Testing & Operations
+- **[Testing Guide](docs/testing/TESTING.md)** - Comprehensive testing documentation
+- **[Deployment Testing](docs/testing/DEPLOYMENT_TEST.md)** - Deployment verification procedures
+- **[Performance Benchmarks](docs/operations/PERFORMANCE.md)** - Performance optimization and results
+
+### Quick References
+- **[README](README.md)** - This file (architecture, setup, API usage)
+- **[Quick Start Guide](QUICKSTART.md)** - Fast-track setup and testing
+
 ## Setup
 
 ### Prerequisites
@@ -668,7 +692,7 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for comprehensive testing guide.
+See [docs/testing/TESTING.md](docs/testing/TESTING.md) for comprehensive testing guide.
 
 **Quick Test:**
 ```bash
