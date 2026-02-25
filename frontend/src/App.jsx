@@ -21,6 +21,7 @@ function App() {
   const [searchSuccessWithUserId, setSearchSuccessWithUserId] = useState(null)
   const [serverWarmedUp, setServerWarmedUp] = useState(false)
   const [warmupStatus, setWarmupStatus] = useState('warming')
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   // Warmup: Call warmup endpoint on page load to prevent cold starts
   useEffect(() => {
@@ -84,6 +85,9 @@ function App() {
       setLatency(response.data.latency_ms)
       setLastResponse(response.data)
       if (payload.user_id) setSearchSuccessWithUserId(payload.user_id)
+      
+      // Trigger profile refresh
+      setRefreshTrigger(prev => prev + 1)
 
       console.log('Search completed:', {
         query: payload.query,
@@ -152,6 +156,7 @@ function App() {
               <UserSummaryPanel
                 onSelectUser={setSelectedUserIdForSearch}
                 searchSuccessWithUserId={searchSuccessWithUserId}
+                refreshTrigger={refreshTrigger}
               />
             </div>
 
