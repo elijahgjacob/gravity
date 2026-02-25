@@ -57,15 +57,17 @@ class GraphitiRepository:
             # Import Graphiti (lazy import to allow graceful degradation)
             from graphiti_core import Graphiti
             from graphiti_core.llm_client import OpenAIClient
+            from graphiti_core.llm_client.config import LLMConfig
             
             logger.info(f"Initializing Graphiti with OpenRouter model: {self.llm_model}")
             
             # Configure OpenRouter as LLM provider
-            llm_client = OpenAIClient(
+            llm_config = LLMConfig(
                 api_key=self.openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model=self.llm_model
             )
+            llm_client = OpenAIClient(config=llm_config)
             
             # Initialize Graphiti client
             self._graphiti_client = Graphiti(
