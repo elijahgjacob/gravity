@@ -1,5 +1,6 @@
 """Repository for Graphiti knowledge graph operations."""
 
+import os
 from datetime import datetime
 from typing import Dict, List, Optional
 from src.core.logging_config import get_logger
@@ -53,6 +54,11 @@ class GraphitiRepository:
             ImportError: If graphiti-core is not installed
             Exception: If initialization fails
         """
+        # Temporarily set OPENAI_API_KEY for OpenAI SDK compatibility
+        # Graphiti's OpenAIClient uses the OpenAI SDK internally, which checks this env var
+        original_openai_key = os.environ.get('OPENAI_API_KEY')
+        os.environ['OPENAI_API_KEY'] = self.openrouter_api_key
+        
         try:
             # Import Graphiti (lazy import to allow graceful degradation)
             from graphiti_core import Graphiti
@@ -88,6 +94,12 @@ class GraphitiRepository:
         except Exception as e:
             logger.error(f"Failed to initialize Graphiti: {e}")
             raise
+        finally:
+            # Restore original OPENAI_API_KEY or remove if it wasn't set
+            if original_openai_key is not None:
+                os.environ['OPENAI_API_KEY'] = original_openai_key
+            else:
+                os.environ.pop('OPENAI_API_KEY', None)
     
     async def add_episode(
         self,
