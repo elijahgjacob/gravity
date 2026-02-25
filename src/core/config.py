@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # Search settings
     TOP_K_CANDIDATES: int = 500  # Reduced from 1500 for faster search
-    MAX_CAMPAIGNS_RETURNED: int = 50  # Reduced from 1000 for faster serialization/network
+    MAX_CAMPAIGNS_RETURNED: int = 1000  
 
     # Server settings
     HOST: str = "0.0.0.0"
