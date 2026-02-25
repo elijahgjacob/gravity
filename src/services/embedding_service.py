@@ -7,6 +7,8 @@ using sentence-transformers for semantic similarity search.
 
 import os
 import numpy as np
+from functools import lru_cache
+from cachetools import TTLCache
 
 # Set threading environment variables BEFORE importing torch
 os.environ.setdefault("OMP_NUM_THREADS", "4")
@@ -24,7 +26,7 @@ class EmbeddingService:
     Converts queries and campaigns to 384-dimensional vector representations
     using the all-MiniLM-L6-v2 model for fast, local inference.
 
-    Performance: ~10-30ms per query embedding on CPU
+    Performance: ~10-30ms per query embedding on CPU (cached: <1ms)
     """
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
@@ -48,6 +50,9 @@ class EmbeddingService:
         # Set model to eval mode for inference
         self.model.eval()
         
+        # Cache for embeddings (1000 entries, 1 hour TTL)
+        self._embedding_cache = TTLCache(maxsize=1000, ttl=3600)
+        
         print(f"Loaded embedding model: {model_name} ({self.embedding_dim} dimensions)")
 
     async def embed_query(self, query: str, categories: list) -> np.ndarray:
@@ -65,8 +70,13 @@ class EmbeddingService:
             numpy array of shape (embedding_dim,) - typically 384 dimensions
         """
         # Combine query + top 3 categories for richer embedding
-        category_text = " ".join(categories[:3]) if categories else ""
+        category_text = " ".join(sorted(categories[:3])) if categories else ""
         combined_text = f"{query} {category_text}".strip()
+        
+        # Check cache first
+        cache_key = combined_text.lower()
+        if cache_key in self._embedding_cache:
+            return self._embedding_cache[cache_key]
 
         # Generate embedding with optimized settings
         with torch.no_grad():
@@ -76,6 +86,9 @@ class EmbeddingService:
                 show_progress_bar=False,
                 normalize_embeddings=True
             )
+        
+        # Cache the result
+        self._embedding_cache[cache_key] = embedding
 
         return embedding
 
