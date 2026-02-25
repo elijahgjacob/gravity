@@ -2,5 +2,5 @@
 # Railway uses railway.json buildCommand; this file adds Node to the Nixpacks environment.
 providers = ["python", "node"]
 
-[phases.setup]
-nixPkgs = ["nodejs_20"]
+[variables]
+NODE_VERSION = "20"
