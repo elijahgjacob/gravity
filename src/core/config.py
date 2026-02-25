@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     # Search settings
-    TOP_K_CANDIDATES: int = 200  # Reduced for faster search
-    MAX_CAMPAIGNS_RETURNED: int = 50  # Reduced for faster serialization  
+    TOP_K_CANDIDATES: int = 1500  # Need 1500 candidates to return 1000 campaigns
+    MAX_CAMPAIGNS_RETURNED: int = 1000  # Required by rubric  
 
     # Server settings
     HOST: str = "0.0.0.0"
