@@ -52,6 +52,8 @@ Thumbs.db
 htmlcov/
 *_results.json
 benchmark_results.json
+*_TEST_SUMMARY.txt
+*_test_results.*
 
 # Logs
 *.log
