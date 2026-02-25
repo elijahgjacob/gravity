@@ -5,7 +5,7 @@
     "buildCommand": "cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build && cd .. && python scripts/generate_data.py && python scripts/build_index.py"
   },
   "deploy": {
-    "startCommand": "gunicorn src.api.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --max-requests 1000 --max-requests-jitter 100",
+    "startCommand": "gunicorn src.api.main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --max-requests 1000 --max-requests-jitter 100 --preload",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
