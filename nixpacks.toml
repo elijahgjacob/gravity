@@ -1,7 +1,12 @@
 # Ensure both Python (backend) and Node (frontend build) are available.
 # Railway uses railway.json buildCommand; this file adds Node to the Nixpacks environment.
-# Using uv for fast Python package installation
 providers = ["python", "node"]
 
+[phases.setup]
+aptPkgs = ["curl"]
+
 [phases.install]
-cmds = ["curl -LsSf https://astral.sh/uv/install.sh | sh"]
+cmds = [
+  "curl -LsSf https://astral.sh/uv/install.sh | sh",
+  "export PATH=\"$HOME/.local/bin:$PATH\" && uv pip install --system -r requirements.txt"
+]
