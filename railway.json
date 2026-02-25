@@ -5,7 +5,7 @@
     "buildCommand": "cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build && cd .. && python scripts/generate_data.py && python scripts/build_index.py"
   },
   "deploy": {
-    "startCommand": "uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 75",
+    "startCommand": "OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 75",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

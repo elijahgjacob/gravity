@@ -5,9 +5,16 @@ This service converts queries and campaigns to vector representations
 using sentence-transformers for semantic similarity search.
 """
 
+import os
 import numpy as np
-from sentence_transformers import SentenceTransformer
+
+# Set threading environment variables BEFORE importing torch
+os.environ.setdefault("OMP_NUM_THREADS", "4")
+os.environ.setdefault("MKL_NUM_THREADS", "4")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+
 import torch
+from sentence_transformers import SentenceTransformer
 
 
 class EmbeddingService:
@@ -17,7 +24,7 @@ class EmbeddingService:
     Converts queries and campaigns to 384-dimensional vector representations
     using the all-MiniLM-L6-v2 model for fast, local inference.
 
-    Performance: ~5-10ms per query embedding (optimized)
+    Performance: ~10-30ms per query embedding on CPU
     """
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
@@ -32,11 +39,13 @@ class EmbeddingService:
         
         # Set number of threads for CPU inference
         torch.set_num_threads(4)
+        torch.set_num_interop_threads(2)
         
+        # Load model
         self.model = SentenceTransformer(model_name)
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
         
-        # Set model to eval mode and optimize for inference
+        # Set model to eval mode for inference
         self.model.eval()
         
         print(f"Loaded embedding model: {model_name} ({self.embedding_dim} dimensions)")
@@ -55,7 +64,7 @@ class EmbeddingService:
         Returns:
             numpy array of shape (embedding_dim,) - typically 384 dimensions
         """
-        # Combine query + top 3 categories for richer embedding (limit categories for speed)
+        # Combine query + top 3 categories for richer embedding
         category_text = " ".join(categories[:3]) if categories else ""
         combined_text = f"{query} {category_text}".strip()
 
@@ -65,13 +74,13 @@ class EmbeddingService:
                 combined_text, 
                 convert_to_numpy=True, 
                 show_progress_bar=False,
-                normalize_embeddings=True  # Pre-normalize for faster cosine similarity
+                normalize_embeddings=True
             )
 
         return embedding
 
     def embed_campaigns_batch(
-        self, campaigns: list[dict], batch_size: int = 32, show_progress: bool = True
+        self, campaigns: list, batch_size: int = 32, show_progress: bool = True
     ) -> np.ndarray:
         """
         Batch embed campaigns for offline index building.
@@ -107,7 +116,7 @@ class EmbeddingService:
             batch_size=batch_size,
             convert_to_numpy=True,
             show_progress_bar=show_progress,
-            normalize_embeddings=False,  # FAISS will handle normalization if needed
+            normalize_embeddings=False,
         )
 
         return embeddings
