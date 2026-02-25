@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import QueryInput from './components/QueryInput'
 import ResultsDisplay from './components/ResultsDisplay'
@@ -19,6 +19,33 @@ function App() {
   const [lastResponse, setLastResponse] = useState(null)
   const [selectedUserIdForSearch, setSelectedUserIdForSearch] = useState(null)
   const [searchSuccessWithUserId, setSearchSuccessWithUserId] = useState(null)
+  const [serverWarmedUp, setServerWarmedUp] = useState(false)
+
+  // Warmup: Call warmup endpoint on page load to prevent cold starts
+  useEffect(() => {
+    const warmupServer = async () => {
+      try {
+        const startTime = performance.now()
+        const response = await axios.get('/api/warmup', { timeout: 30000 }) // 30s timeout for cold starts
+        const endTime = performance.now()
+        
+        console.log('Server warmup completed:', {
+          status: response.data.status,
+          warmupTime: response.data.warmup_time_ms,
+          totalTime: Math.round(endTime - startTime),
+          modelsLoaded: response.data.models_loaded
+        })
+        
+        setServerWarmedUp(true)
+      } catch (err) {
+        console.warn('Server warmup failed (non-critical):', err.message)
+        // Don't show error to user - this is a background optimization
+        setServerWarmedUp(true) // Mark as warmed up anyway to prevent blocking
+      }
+    }
+
+    warmupServer()
+  }, []) // Run once on mount
 
   const handleSearch = async (requestData) => {
     const payload = { ...requestData }
