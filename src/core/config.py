@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     TAXONOMY_PATH: str = "data/taxonomy.json"
 
     # Model settings
-    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    EMBEDDING_MODEL: str = "paraphrase-MiniLM-L3-v2"  # 2x faster than L6, 3 layers vs 6
 
     # Search settings
     TOP_K_CANDIDATES: int = 1500  # Need 1500 candidates to return 1000 campaigns

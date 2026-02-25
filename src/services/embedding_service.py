@@ -24,18 +24,18 @@ class EmbeddingService:
     SERVICE: Business logic for text embedding.
 
     Converts queries and campaigns to 384-dimensional vector representations
-    using the all-MiniLM-L6-v2 model for fast, local inference.
+    using sentence-transformers for fast, local inference.
 
-    Performance: ~10-30ms per query embedding on CPU (cached: <1ms)
+    Performance: ~5-15ms per query embedding on CPU (cached: <1ms)
     """
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "paraphrase-MiniLM-L3-v2"):
         """
         Initialize the embedding service.
 
         Args:
             model_name: Name of the sentence-transformers model to use
-                       Default: all-MiniLM-L6-v2 (384 dims, fast inference)
+                       Default: paraphrase-MiniLM-L3-v2 (384 dims, ~2x faster than L6)
         """
         self.model_name = model_name
         
