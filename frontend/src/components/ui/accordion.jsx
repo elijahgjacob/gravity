@@ -14,7 +14,13 @@ export function Accordion({ children, defaultOpen = false }) {
 }
 
 export function AccordionItem({ children, isOpen, setIsOpen }) {
-  return <div className="border-b last:border-b-0">{children}</div>
+  return (
+    <div className="border-b last:border-b-0">
+      {React.Children.map(children, child =>
+        React.cloneElement(child, { isOpen, setIsOpen })
+      )}
+    </div>
+  )
 }
 
 export function AccordionTrigger({ children, isOpen, setIsOpen }) {
