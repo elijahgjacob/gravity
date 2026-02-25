@@ -130,12 +130,17 @@ class RetrievalController:
             except Exception as e:
                 logger.warning(f"Profile lookup failed (non-critical): {e}")
 
-        # Phase 1: Parallel processing of eligibility and categories
-        logger.debug("Phase 1: Parallel eligibility + category extraction")
+        # Phase 1: Parallel processing of eligibility, categories, AND embedding
+        # Start embedding early with just the query (no categories yet) for speed
+        logger.debug("Phase 1: Parallel eligibility + category + embedding")
         eligibility_task = self.eligibility_service.score(request.query, context_dict)
         categories_task = self.category_service.extract(request.query, context_dict)
+        # Start embedding with just query + inferred categories (don't wait for extraction)
+        embedding_task = self.embedding_service.embed_query(request.query, inferred_categories)
 
-        eligibility_result, extracted_categories = await asyncio.gather(eligibility_task, categories_task)
+        eligibility_result, extracted_categories, query_embedding = await asyncio.gather(
+            eligibility_task, categories_task, embedding_task
+        )
         
         # Merge extracted categories with inferred categories
         categories = list(set(extracted_categories + inferred_categories))
@@ -164,20 +169,16 @@ class RetrievalController:
                 },
             )
 
-        # Phase 2: Embedding generation
-        logger.debug("Phase 2: Query embedding")
-        query_embedding = await self.embedding_service.embed_query(request.query, categories)
-
-        # Phase 3: Vector similarity search
-        logger.debug("Phase 3: Vector search")
+        # Phase 2: Vector similarity search (embedding already done in parallel)
+        logger.debug("Phase 2: Vector search")
         candidates = await self.search_service.search(
-            query_embedding, k=500  # Optimized for speed
+            query_embedding, k=200  # Reduced for speed
         )
 
         logger.debug(f"Retrieved {len(candidates)} candidates")
 
-        # Phase 4: Relevance ranking
-        logger.debug("Phase 4: Relevance ranking")
+        # Phase 3: Relevance ranking
+        logger.debug("Phase 3: Relevance ranking")
         ranked_campaigns = await self.ranking_service.rank(
             candidates, request.query, categories, context_dict
         )

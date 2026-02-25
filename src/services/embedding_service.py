@@ -7,6 +7,7 @@ using sentence-transformers for semantic similarity search.
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
+import torch
 
 
 class EmbeddingService:
@@ -16,7 +17,7 @@ class EmbeddingService:
     Converts queries and campaigns to 384-dimensional vector representations
     using the all-MiniLM-L6-v2 model for fast, local inference.
 
-    Performance: ~5-10ms per query embedding
+    Performance: ~5-10ms per query embedding (optimized)
     """
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
@@ -28,11 +29,19 @@ class EmbeddingService:
                        Default: all-MiniLM-L6-v2 (384 dims, fast inference)
         """
         self.model_name = model_name
+        
+        # Set number of threads for CPU inference
+        torch.set_num_threads(4)
+        
         self.model = SentenceTransformer(model_name)
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
+        
+        # Set model to eval mode and optimize for inference
+        self.model.eval()
+        
         print(f"Loaded embedding model: {model_name} ({self.embedding_dim} dimensions)")
 
-    async def embed_query(self, query: str, categories: list[str]) -> np.ndarray:
+    async def embed_query(self, query: str, categories: list) -> np.ndarray:
         """
         Embed query text combined with extracted categories.
 
@@ -46,13 +55,18 @@ class EmbeddingService:
         Returns:
             numpy array of shape (embedding_dim,) - typically 384 dimensions
         """
-        # Combine query + categories for richer embedding
-        # This helps the embedding capture both semantic meaning and category context
-        category_text = " ".join(categories) if categories else ""
+        # Combine query + top 3 categories for richer embedding (limit categories for speed)
+        category_text = " ".join(categories[:3]) if categories else ""
         combined_text = f"{query} {category_text}".strip()
 
-        # Generate embedding (synchronous operation, but wrapped in async for consistency)
-        embedding = self.model.encode(combined_text, convert_to_numpy=True, show_progress_bar=False)
+        # Generate embedding with optimized settings
+        with torch.no_grad():
+            embedding = self.model.encode(
+                combined_text, 
+                convert_to_numpy=True, 
+                show_progress_bar=False,
+                normalize_embeddings=True  # Pre-normalize for faster cosine similarity
+            )
 
         return embedding
 
