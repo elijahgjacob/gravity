@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     # Search settings
-    TOP_K_CANDIDATES: int = 1500
-    MAX_CAMPAIGNS_RETURNED: int = 1000
+    TOP_K_CANDIDATES: int = 500  # Reduced from 1500 for faster search
+    MAX_CAMPAIGNS_RETURNED: int = 50  # Reduced from 1000 for faster serialization/network
 
     # Server settings
     HOST: str = "0.0.0.0"
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     GRAPHITI_NAMESPACE: str = "ad_retrieval"
     
     # Profile Analysis settings
-    PROFILE_ANALYSIS_ENABLED: bool = True
+    PROFILE_ANALYSIS_ENABLED: bool = False  # Disabled for better latency
     PROFILE_CACHE_SIZE: int = 10000
     PROFILE_CACHE_TTL_SECONDS: int = 604800  # 7 days
     PROFILE_ANALYSIS_TRIGGER_EVERY_N_QUERIES: int = 5

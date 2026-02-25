@@ -171,7 +171,7 @@ class RetrievalController:
         # Phase 3: Vector similarity search
         logger.debug("Phase 3: Vector search")
         candidates = await self.search_service.search(
-            query_embedding, k=1500  # Retrieve more than 1000 for better ranking
+            query_embedding, k=500  # Optimized for speed
         )
 
         logger.debug(f"Retrieved {len(candidates)} candidates")
@@ -182,8 +182,8 @@ class RetrievalController:
             candidates, request.query, categories, context_dict
         )
 
-        # Return top 1000 (or fewer if less available)
-        final_campaigns = ranked_campaigns[:1000]
+        # Return top 50 (optimized for speed)
+        final_campaigns = ranked_campaigns[:50]
 
         latency_ms = (time.perf_counter() - start_time) * 1000
 

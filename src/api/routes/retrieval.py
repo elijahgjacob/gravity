@@ -23,7 +23,7 @@ router = APIRouter()
     **Process:**
     1. Scores ad eligibility (0.0-1.0)
     2. Extracts relevant categories (1-10)
-    3. Returns top 1000 campaigns by relevance
+    3. Returns top 50 campaigns by relevance
     
     **Target Latency:** < 100ms (p95)
     """,

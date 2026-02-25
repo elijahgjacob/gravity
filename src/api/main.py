@@ -7,6 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -50,8 +51,9 @@ app = FastAPI(
     **Features:**
     - Ad eligibility scoring (0.0-1.0)
     - Category extraction (1-10 categories)
-    - Campaign retrieval and ranking (top 1,000)
+    - Campaign retrieval and ranking (top 50)
     - Context-based targeting
+    - GZip compression for fast responses
     """,
     version="1.0.0",
     lifespan=lifespan,
@@ -68,6 +70,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# GZip compression middleware (compress responses > 1KB)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 @app.middleware("http")
