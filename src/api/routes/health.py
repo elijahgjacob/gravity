@@ -61,13 +61,19 @@ async def readiness_check() -> dict:
     "/warmup",
     status_code=status.HTTP_200_OK,
     summary="Warmup endpoint",
-    description="Lightweight endpoint to warm up models and prevent cold starts",
+    description="Aggressively warm up all models and services to prevent cold starts",
 )
 async def warmup(controller: RetrievalController = Depends(get_retrieval_controller)) -> dict:
     """
     Warmup endpoint to prevent cold starts.
     
-    Triggers model loading (embeddings, FAISS index) without requiring user data.
+    Aggressively loads ALL models and services:
+    - Sentence-transformers embedding model
+    - FAISS vector index
+    - TF-IDF vectorizer
+    - Blocklist and taxonomy
+    - All service dependencies
+    
     This is called automatically by the frontend on page load.
     
     Returns:
@@ -76,33 +82,49 @@ async def warmup(controller: RetrievalController = Depends(get_retrieval_control
     try:
         from src.api.models.requests import RetrievalRequest
         import time
+        import asyncio
         
         start_time = time.perf_counter()
         
-        # Make a minimal, anonymous request to load all models
-        warmup_request = RetrievalRequest(
-            query="test",  # Minimal query to trigger model loading
-            context=None,
-            user_id=None,  # No user tracking
-            session_id=None
-        )
+        # Make 3 concurrent requests to aggressively warm up all code paths
+        warmup_queries = [
+            "running shoes",  # Trigger embedding + FAISS
+            "laptop",         # Different category
+            "travel"          # Another category
+        ]
         
-        # Execute retrieval to warm up all services
-        _ = await controller.retrieve(warmup_request)
+        tasks = []
+        for query in warmup_queries:
+            warmup_request = RetrievalRequest(
+                query=query,
+                context=None,
+                user_id=None,  # No user tracking
+                session_id=None
+            )
+            tasks.append(controller.retrieve(warmup_request))
+        
+        # Execute all warmup requests concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
         
         warmup_time = (time.perf_counter() - start_time) * 1000
         
-        logger.info(f"Warmup completed in {warmup_time:.2f}ms")
+        # Check if any failed
+        failures = [r for r in results if isinstance(r, Exception)]
+        success_count = len(results) - len(failures)
+        
+        logger.info(f"🔥 Aggressive warmup completed: {success_count}/{len(warmup_queries)} successful in {warmup_time:.2f}ms")
         
         return {
             "status": "warmed_up",
             "warmup_time_ms": round(warmup_time, 2),
             "models_loaded": True,
-            "message": "Server is ready for requests"
+            "warmup_queries": len(warmup_queries),
+            "successful": success_count,
+            "message": f"Server fully warmed up with {success_count} test queries"
         }
         
     except Exception as e:
-        logger.warning(f"Warmup request failed (non-critical): {e}")
+        logger.error(f"❌ Warmup failed: {e}", exc_info=True)
         return {
             "status": "warmup_attempted",
             "models_loaded": False,

@@ -87,6 +87,17 @@ async def init_dependencies():
         _embedding_service = EmbeddingService(settings.EMBEDDING_MODEL)
         logger.info("✓ Embedding service initialized")
         
+        # 🔥 AGGRESSIVE WARMUP: Run test inference to preload model weights
+        try:
+            logger.info("🔥 Preloading embedding model with test inference...")
+            import asyncio
+            test_queries = ["test", "warmup", "preload"]
+            for query in test_queries:
+                _ = await _embedding_service.embed_query(query, ["general"])
+            logger.info("✓ Embedding model preloaded and ready")
+        except Exception as e:
+            logger.warning(f"Embedding preload failed (non-critical): {e}")
+        
         # Initialize Graphiti (optional - graceful degradation)
         if settings.GRAPHITI_ENABLED and GraphitiRepository is not None:
             try:

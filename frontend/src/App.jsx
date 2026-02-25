@@ -20,16 +20,18 @@ function App() {
   const [selectedUserIdForSearch, setSelectedUserIdForSearch] = useState(null)
   const [searchSuccessWithUserId, setSearchSuccessWithUserId] = useState(null)
   const [serverWarmedUp, setServerWarmedUp] = useState(false)
+  const [warmupStatus, setWarmupStatus] = useState('warming')
 
   // Warmup: Call warmup endpoint on page load to prevent cold starts
   useEffect(() => {
     const warmupServer = async () => {
       try {
+        setWarmupStatus('warming')
         const startTime = performance.now()
         const response = await axios.get('/api/warmup', { timeout: 30000 }) // 30s timeout for cold starts
         const endTime = performance.now()
         
-        console.log('Server warmup completed:', {
+        console.log('✅ Server warmup completed:', {
           status: response.data.status,
           warmupTime: response.data.warmup_time_ms,
           totalTime: Math.round(endTime - startTime),
@@ -37,15 +39,33 @@ function App() {
         })
         
         setServerWarmedUp(true)
+        setWarmupStatus('ready')
       } catch (err) {
-        console.warn('Server warmup failed (non-critical):', err.message)
+        console.warn('⚠️ Server warmup failed (non-critical):', err.message)
         // Don't show error to user - this is a background optimization
         setServerWarmedUp(true) // Mark as warmed up anyway to prevent blocking
+        setWarmupStatus('error')
       }
     }
 
     warmupServer()
   }, []) // Run once on mount
+
+  // Keep-alive: Ping server every 2 minutes to prevent worker sleep
+  useEffect(() => {
+    if (!serverWarmedUp) return
+
+    const keepAlive = setInterval(async () => {
+      try {
+        await axios.get('/api/health', { timeout: 5000 })
+        console.log('🔄 Keep-alive ping successful')
+      } catch (err) {
+        console.warn('⚠️ Keep-alive ping failed:', err.message)
+      }
+    }, 120000) // Every 2 minutes
+
+    return () => clearInterval(keepAlive)
+  }, [serverWarmedUp])
 
   const handleSearch = async (requestData) => {
     const payload = { ...requestData }
@@ -106,6 +126,18 @@ function App() {
                   <Zap className="w-3 h-3" />
                   384D
                 </Badge>
+                {warmupStatus === 'warming' && (
+                  <Badge variant="outline" className="flex items-center gap-1 px-2 py-0.5 text-[11px] animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                    Warming...
+                  </Badge>
+                )}
+                {warmupStatus === 'ready' && (
+                  <Badge variant="outline" className="flex items-center gap-1 px-2 py-0.5 text-[11px]">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    Ready
+                  </Badge>
+                )}
               </div>
               <ThemeToggle />
             </div>
