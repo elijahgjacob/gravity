@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     # Search settings
-    TOP_K_CANDIDATES: int = 500  # Reduced from 1500 for faster search
+    TOP_K_CANDIDATES: int = 1500  # Reduced from 1500 for faster search
     MAX_CAMPAIGNS_RETURNED: int = 1000  
 
     # Server settings
