@@ -120,10 +120,10 @@ Scroll down to the **"Search Query"** card.
 ### What to Notice
 
 **Each Query:**
-- Creates a new entry in the user's query history
+- Creates a new entry in the user's query history (when profile tracking enabled)
 - Updates the profile's inferred intents and categories
 - Contributes to pattern detection (e.g., "Sports & Fitness Enthusiast")
-- Triggers profile analysis (after every 5th query by default)
+- Triggers profile analysis after every 5th query (when `PROFILE_ANALYSIS_ENABLED=true`)
 
 **Results Change:**
 - Campaigns match the query semantically
@@ -187,7 +187,7 @@ Return to the **"User Profile & Journey"** card at the top.
 - **Inferred Categories** (purple badges): System-detected from queries
 - **Aggregated Interests** (indigo badges): Consolidated from context
 
-**🤖 LLM Summary**
+**🤖 LLM Summary** (When Profile Analysis Enabled)
 - **Narrative Summary**: AI-generated profile description
   - Example: "User demonstrates strong interest in fitness and athletic activities, with focus on running and marathon training. Queries suggest health-conscious lifestyle with emphasis on quality athletic gear."
 - **Suggested Ad Campaigns**: LLM recommendations
@@ -196,8 +196,11 @@ Return to the **"User Profile & Journey"** card at the top.
   - "→ Marathon training nutrition plans"
 
 **Special Cases:**
-- If summary shows "Summary not available", the OpenRouter API key may not be configured
-- Pattern-based analysis still works without LLM
+- If summary shows "Summary not available":
+  - Profile analysis may be disabled (`PROFILE_ANALYSIS_ENABLED=false`)
+  - Or OpenRouter API key may not be configured
+- Pattern-based analysis still works without LLM when profile analysis is enabled
+- **Production Note**: Profile analysis is disabled by default for latency optimization
 
 3. **Trigger Manual Analysis**
    - Click **"Force Analyze"** button to re-run profile analysis
@@ -374,10 +377,11 @@ Each campaign card shows:
 - Try: "footwear for long distance running" → Still returns marathon shoes
 - 384-dimensional embeddings capture semantic similarity
 
-### Sub-100ms Latency
+### Optimized Latency
 - FAISS index enables fast vector search
 - Pre-loaded embeddings and models
-- Optimized for production performance
+- Graphiti and Profile Analysis disabled in production for speed
+- Embedding cache for repeated queries
 
 ---
 
@@ -397,9 +401,15 @@ Each campaign card shows:
 - **Fix**: Create profiles by sending queries
 
 ### Slow First Query
-- **Cause**: Server cold start (Railway.app)
+- **Cause**: Server cold start (Railway.app) - embedding model loading
 - **Wait**: Server shows "Warming..." then "Ready"
-- **Impact**: First query may take 1-5 seconds, subsequent queries <100ms
+- **Impact**: First query may take 1-3 seconds, subsequent queries faster
+- **Tip**: Call `/api/warmup` endpoint to pre-warm the server
+
+### Profile Features Not Working
+- **Cause**: Profile analysis disabled in production for latency
+- **Check**: `PROFILE_ANALYSIS_ENABLED` environment variable
+- **Impact**: User profiles still tracked, but LLM summaries unavailable
 
 ---
 
@@ -416,20 +426,24 @@ Each campaign card shows:
 
 ## 🚀 Advanced Features
 
-### Profile Analysis Trigger
-- By default, LLM analysis runs every 5th query
+### Profile Analysis (Optional)
+- LLM analysis runs every 5th query when enabled
 - Can be forced with "Force Analyze" button
 - Configurable via `PROFILE_ANALYSIS_TRIGGER_EVERY_N_QUERIES`
+- **Note**: Disabled in production (`PROFILE_ANALYSIS_ENABLED=false`) for latency optimization
+- User profiles and query history still tracked; only LLM analysis is disabled
 
 ### Cache Management
 - Profiles cached for 7 days (configurable)
 - Maximum 10,000 profiles in memory
 - LRU eviction when cache is full
 
-### Graphiti Integration (Phase 2)
-- Future: Knowledge graph of user journeys
+### Graphiti Integration (Optional)
+- Knowledge graph of user journeys
 - Temporal analysis of query patterns
 - Campaign co-occurrence tracking
+- **Note**: Disabled in production (`GRAPHITI_ENABLED=false`) for latency optimization
+- Enable for development/testing environments only
 
 ---
 
