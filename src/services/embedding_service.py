@@ -123,13 +123,13 @@ class EmbeddingService:
             text = f"{title} {description} {keywords}".strip()
             texts.append(text)
 
-        # Batch encode all campaigns
+        # Batch encode all campaigns (normalized to match query embeddings)
         embeddings = self.model.encode(
             texts,
             batch_size=batch_size,
             convert_to_numpy=True,
             show_progress_bar=show_progress,
-            normalize_embeddings=False,
+            normalize_embeddings=True,  # Must match query embedding normalization
         )
 
         return embeddings
